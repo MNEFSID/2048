@@ -2,130 +2,56 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login 2048</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-
-<style>
-body{
-  font-family:'Poppins',sans-serif;
-  background:#faf8ef;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  margin:0;
-}
-
-#box{
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-  width:280px;
-  text-align:center;
-}
-
-h2{
-  font-family:'Fredoka';
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border:none;
-  border-radius:8px;
-  background:#8f7a66;
-  color:white;
-  font-family:'Fredoka';
-}
-
-#msg{
-  color:red;
-  font-size:13px;
-}
-</style>
 </head>
 <body>
 
-<div id="box">
-  <h2>2048 Login</h2>
+<h2>Login / Register</h2>
 
-  <input id="name" placeholder="Nama (register)">
-  <input id="email" placeholder="Email">
-  <input id="pass" type="password" placeholder="Password">
+<input id="email" placeholder="Email"><br><br>
+<input id="pass" type="password" placeholder="Password"><br><br>
 
-  <button onclick="register()">Register</button>
-  <button onclick="login()">Login</button>
-
-  <p id="msg"></p>
-</div>
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA1SxlN2devIAFSO-_iB7QEKlOtCGC9e1E",
-  authDomain: "project-6710900057226316014.firebaseapp.com",
-  projectId: "project-6710900057226316014",
+  apiKey: "AIzaSyBAw_4EbDeR-j_V8RCBvhkDtIuDH3fIZBc",
+  authDomain: "game-45646.firebaseapp.com",
+  projectId: "game-45646",
+  storageBucket: "game-45646.firebasestorage.app",
+  messagingSenderId: "488036675536",
+  appId: "1:488036675536:web:5ecea3d39f145a78e693d5"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 
-onAuthStateChanged(auth,(user)=>{
-  if(user) location.href="main.html";
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("pass");
+
+// AUTO REDIRECT KALO UDAH LOGIN 🔥
+onAuthStateChanged(auth, user => {
+  if(user){
+    location.href = "main.html";
+  }
 });
 
-window.register = async function(){
-  let name = document.getElementById("name").value.trim();
-  let email = document.getElementById("email").value.trim();
-  let pass = document.getElementById("pass").value.trim();
+window.register = () => {
+  createUserWithEmailAndPassword(auth, emailInput.value, passInput.value)
+    .then(()=> alert("Register sukses!"))
+    .catch(e=> alert(e.message));
+};
 
-  if(!name) return showMsg("Nama wajib!");
-  if(!email || !pass) return showMsg("Email & password wajib!");
-
-  try{
-    let userCred = await createUserWithEmailAndPassword(auth,email,pass);
-    await setDoc(doc(db,"users",userCred.user.uid),{
-      name:name,
-      score:0
-    });
-    location.href="main.html";
-  }catch(e){
-    showMsg(e.message);
-    console.log(e);
-  }
-}
-
-window.login = async function(){
-  let email = document.getElementById("email").value;
-  let pass = document.getElementById("pass").value;
-
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-    location.href="main.html";
-  }catch(e){
-    showMsg("Login gagal!");
-  }
-}
-
-function showMsg(t){
-  document.getElementById("msg").innerText=t;
-}
+window.login = () => {
+  signInWithEmailAndPassword(auth, emailInput.value, passInput.value)
+    .then(()=> location.href="main.html")
+    .catch(e=> alert(e.message));
+};
 </script>
 
 </body>
