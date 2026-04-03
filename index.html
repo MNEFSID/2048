@@ -29,7 +29,6 @@ body{
 
 h2{
   font-family:'Fredoka';
-  margin-bottom:15px;
 }
 
 input{
@@ -49,17 +48,11 @@ button{
   background:#8f7a66;
   color:white;
   font-family:'Fredoka';
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:0.9;
 }
 
 #msg{
-  margin-top:10px;
-  font-size:13px;
   color:red;
+  font-size:13px;
 }
 </style>
 </head>
@@ -68,7 +61,7 @@ button:hover{
 <div id="box">
   <h2>2048 Login</h2>
 
-  <input id="name" placeholder="Nama (untuk register)">
+  <input id="name" placeholder="Nama (register)">
   <input id="email" placeholder="Email">
   <input id="pass" type="password" placeholder="Password">
 
@@ -78,62 +71,49 @@ button:hover{
   <p id="msg"></p>
 </div>
 
-<!-- 🔥 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* 🔥 CONFIG LU */
 const firebaseConfig = {
-  apiKey: "ISI",
-  authDomain: "ISI",
-  projectId: "ISI"
+  apiKey: "AIzaSyA1SxlN2devIAFSO-_iB7QEKlOtCGC9e1E",
+  authDomain: "project-6710900057226316014.firebaseapp.com",
+  projectId: "project-6710900057226316014",
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-/* 🔐 AUTO LOGIN (kalau udah login langsung ke game) */
 onAuthStateChanged(auth,(user)=>{
-  if(user){
-    location.href="main.html";
-  }
+  if(user) location.href="main.html";
 });
 
-/* 📝 REGISTER */
 window.register = async function(){
   let name = document.getElementById("name").value.trim();
   let email = document.getElementById("email").value.trim();
   let pass = document.getElementById("pass").value.trim();
 
-  if(!name) return showMsg("Nama wajib diisi!");
+  if(!name) return showMsg("Nama wajib!");
   if(!email || !pass) return showMsg("Email & password wajib!");
 
   try{
     let userCred = await createUserWithEmailAndPassword(auth,email,pass);
-    let user = userCred.user;
-
-    // 🔥 SIMPAN USER KE DATABASE
-    await setDoc(doc(db,"users",user.uid),{
-      name: name,
-      score: 0
+    await setDoc(doc(db,"users",userCred.user.uid),{
+      name:name,
+      score:0
     });
-
     location.href="main.html";
-
   }catch(e){
     showMsg(e.message);
+    console.log(e);
   }
 }
 
-/* 🔑 LOGIN */
 window.login = async function(){
-  let email = document.getElementById("email").value.trim();
-  let pass = document.getElementById("pass").value.trim();
-
-  if(!email || !pass) return showMsg("Isi email & password!");
+  let email = document.getElementById("email").value;
+  let pass = document.getElementById("pass").value;
 
   try{
     await signInWithEmailAndPassword(auth,email,pass);
@@ -143,11 +123,10 @@ window.login = async function(){
   }
 }
 
-/* ❗ ERROR MSG */
-function showMsg(text){
-  document.getElementById("msg").innerText = text;
+function showMsg(t){
+  document.getElementById("msg").innerText=t;
 }
 </script>
 
 </body>
-  </html>
+</html>
