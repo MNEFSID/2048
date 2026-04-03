@@ -1,29 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login 2048</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:'Poppins',sans-serif;
+  background:#faf8ef;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+#box{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  width:280px;
+  text-align:center;
+}
+
+h2{
+  font-family:'Fredoka';
+  margin-bottom:15px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border:none;
+  border-radius:8px;
+  background:#8f7a66;
+  color:white;
+  font-family:'Fredoka';
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+#msg{
+  margin-top:10px;
+  font-size:13px;
+  color:red;
+}
+</style>
 </head>
 <body>
 
-<h2>Login / Register</h2>
+<div id="box">
+  <h2>2048 Login</h2>
 
-<input id="name" placeholder="Nama (wajib daftar)">
-<br><br>
-<input id="email" placeholder="Email">
-<br><br>
-<input id="pass" type="password" placeholder="Password">
-<br><br>
+  <input id="name" placeholder="Nama (untuk register)">
+  <input id="email" placeholder="Email">
+  <input id="pass" type="password" placeholder="Password">
 
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <button onclick="login()">Login</button>
 
-<p id="msg"></p>
+  <p id="msg"></p>
+</div>
 
+<!-- 🔥 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* 🔥 CONFIG LU */
 const firebaseConfig = {
   apiKey: "ISI",
   authDomain: "ISI",
@@ -34,33 +95,59 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
+/* 🔐 AUTO LOGIN (kalau udah login langsung ke game) */
+onAuthStateChanged(auth,(user)=>{
+  if(user){
+    location.href="main.html";
+  }
+});
+
+/* 📝 REGISTER */
 window.register = async function(){
-  let name = document.getElementById("name").value;
-  let email = document.getElementById("email").value;
-  let pass = document.getElementById("pass").value;
+  let name = document.getElementById("name").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let pass = document.getElementById("pass").value.trim();
 
-  if(!name) return alert("Nama wajib!");
+  if(!name) return showMsg("Nama wajib diisi!");
+  if(!email || !pass) return showMsg("Email & password wajib!");
 
-  let userCred = await createUserWithEmailAndPassword(auth,email,pass);
-  let user = userCred.user;
+  try{
+    let userCred = await createUserWithEmailAndPassword(auth,email,pass);
+    let user = userCred.user;
 
-  // simpan nama 🔥
-  await setDoc(doc(db,"users",user.uid),{
-    name:name,
-    score:0
-  });
+    // 🔥 SIMPAN USER KE DATABASE
+    await setDoc(doc(db,"users",user.uid),{
+      name: name,
+      score: 0
+    });
 
-  location.href = "main.html";
+    location.href="main.html";
+
+  }catch(e){
+    showMsg(e.message);
+  }
 }
 
+/* 🔑 LOGIN */
 window.login = async function(){
-  let email = document.getElementById("email").value;
-  let pass = document.getElementById("pass").value;
+  let email = document.getElementById("email").value.trim();
+  let pass = document.getElementById("pass").value.trim();
 
-  await signInWithEmailAndPassword(auth,email,pass);
-  location.href = "main.html";
+  if(!email || !pass) return showMsg("Isi email & password!");
+
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+    location.href="main.html";
+  }catch(e){
+    showMsg("Login gagal!");
+  }
+}
+
+/* ❗ ERROR MSG */
+function showMsg(text){
+  document.getElementById("msg").innerText = text;
 }
 </script>
 
 </body>
-</html>
+  </html>
