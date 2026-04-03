@@ -14,11 +14,27 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
+  margin:0;
 }
+
+h1{font-family:'Fredoka';}
 
 #leaderboard{
   margin-top:10px;
   font-size:14px;
+}
+
+#scoreBox{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.box{
+  background:#bbada0;
+  color:white;
+  padding:10px 15px;
+  border-radius:10px;
 }
 
 #game{
@@ -28,15 +44,57 @@ body{
   position:relative;
   border-radius:10px;
 }
+
+.cell,.tile{
+  position:absolute;
+  width:calc((320px - 50px)/4);
+  height:calc((320px - 50px)/4);
+  border-radius:10px;
+}
+
+.cell{background:#cdc1b4;}
+
+.tile{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Fredoka';
+  font-weight:600;
+  transition:.15s;
+}
+
+#over{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:rgba(238,228,218,0.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:999;
+}
 </style>
 </head>
 <body>
 
-<h2 id="player">Loading...</h2>
-<div id="game"></div>
-<h3>Score: <span id="score">0</span></h3>
-<div id="leaderboard"></div>
+<h1>2048</h1>
 
+<div id="scoreBox">
+  <div class="box">Score<br><span id="score">0</span></div>
+  <div class="box">Best<br><span id="best">0</span></div>
+</div>
+
+<div id="game">
+  <div id="over">
+    Game Over
+    <button onclick="restart()">Restart</button>
+  </div>
+</div>
+
+<div id="leaderboard">Loading leaderboard...</div>
+
+<!-- 🔥 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -52,54 +110,259 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let uid;
+let uid=null;
 
 onAuthStateChanged(auth, async(user)=>{
-  if(!user) return location.href="index.html";
+  if(!user){
+    location.href="index.html";
+    return;
+  }
 
   uid = user.uid;
 
-  let snap = await getDoc(doc(db,"users",uid));
-  document.getElementById("player").innerText = "Player: "+snap.data().name;
-
-  loadLeaderboard();
+  try{
+    loadLeaderboard();
+  }catch(e){
+    console.log(e);
+  }
 });
 
-async function saveScore(score){
+window.saveScoreOnline = async function(score){
   if(!uid) return;
 
-  let ref = doc(db,"users",uid);
-  let snap = await getDoc(ref);
+  try{
+    const ref = doc(db,"users",uid);
+    const snap = await getDoc(ref);
 
-  if(score > (snap.data().score||0)){
-    await updateDoc(ref,{score});
-    loadLeaderboard();
+    let old = snap.data()?.score || 0;
+
+    if(score > old){
+      await updateDoc(ref,{score});
+      loadLeaderboard();
+    }
+  }catch(e){
+    console.log("save error",e);
+  }
+};
+
+async function loadLeaderboard(){
+  try{
+    const snap = await getDocs(collection(db,"users"));
+
+    let data=[];
+    snap.forEach(d=>data.push(d.data()));
+
+    data.sort((a,b)=>b.score-a.score);
+
+    let html="<b>Leaderboard</b><br>";
+    data.slice(0,5).forEach((d,i)=>{
+      html+=`${i+1}. ${d.name} - ${d.score}<br>`;
+    });
+
+    document.getElementById("leaderboard").innerHTML=html;
+  }catch(e){
+    document.getElementById("leaderboard").innerText="Leaderboard error";
+  }
+}
+</script>
+
+<!-- 🎮 GAME LU (ASLI + ONLINE) -->
+<script>
+const game=document.getElementById("game");
+const size=4, gameSize=320, gap=10;
+const tileSize=(gameSize-gap*(size+1))/size;
+
+let grid,tiles={},score=0;
+let best=localStorage.getItem("best2048")||0;
+document.getElementById("best").innerText=best;
+
+function pos(r,c){
+  return{
+    x:gap+c*(tileSize+gap),
+    y:gap+r*(tileSize+gap)
+  };
+}
+
+function init(){
+  grid=Array(size).fill().map(()=>Array(size).fill(0));
+  game.querySelectorAll(".cell,.tile").forEach(e=>e.remove());
+  tiles={}; score=0; updateScore();
+
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      let d=document.createElement("div");
+      d.className="cell";
+      let p=pos(r,c);
+      d.style.left=p.x+"px";
+      d.style.top=p.y+"px";
+      game.appendChild(d);
+    }
+  }
+
+  spawn(); spawn();
+}
+
+function spawn(){
+  let empty=[];
+  for(let r=0;r<size;r++)
+    for(let c=0;c<size;c++)
+      if(!grid[r][c]) empty.push({r,c});
+
+  if(!empty.length) return;
+
+  let {r,c}=empty[Math.floor(Math.random()*empty.length)];
+  let val=Math.random()<0.9?2:4;
+  grid[r][c]=val;
+
+  let t=createTile(r,c,val);
+  t.classList.add("spawn");
+}
+
+function createTile(r,c,val){
+  let t=document.createElement("div");
+  t.className="tile";
+  t.innerText=val;
+  t.dataset.val=val;
+
+  let p=pos(r,c);
+  t.style.left=p.x+"px";
+  t.style.top=p.y+"px";
+
+  game.appendChild(t);
+  tiles[r+"-"+c]=t;
+  return t;
+}
+
+function updateScore(){
+  document.getElementById("score").innerText=score;
+
+  if(score>best){
+    best=score;
+    localStorage.setItem("best2048",best);
+    document.getElementById("best").innerText=best;
+  }
+
+  if(window.saveScoreOnline){
+    window.saveScoreOnline(score);
   }
 }
 
-async function loadLeaderboard(){
-  let snap = await getDocs(collection(db,"users"));
+function move(dir){
+  let moved=false;
+  let newGrid=Array(size).fill().map(()=>Array(size).fill(0));
+  let merged={};
 
-  let data=[];
-  snap.forEach(d=>data.push(d.data()));
+  let order=[];
+  for(let r=0;r<size;r++)
+    for(let c=0;c<size;c++)
+      order.push({r,c});
 
-  data.sort((a,b)=>b.score-a.score);
+  if(dir==="right"||dir==="down") order.reverse();
 
-  let html="<b>Leaderboard</b><br>";
-  data.slice(0,10).forEach((d,i)=>{
-    html+=`${i+1}. ${d.name} - ${d.score}<br>`;
+  order.forEach(({r,c})=>{
+    let val=grid[r][c];
+    if(!val) return;
+
+    let nr=r,nc=c;
+
+    while(true){
+      let tr=nr,tc=nc;
+      if(dir==="left") tc--;
+      if(dir==="right") tc++;
+      if(dir==="up") tr--;
+      if(dir==="down") tr++;
+
+      if(tr<0||tr>=size||tc<0||tc>=size) break;
+
+      if(newGrid[tr][tc]===0){
+        nr=tr; nc=tc;
+      }else if(newGrid[tr][tc]===val && !merged[tr+"-"+tc]){
+        nr=tr; nc=tc;
+        merged[tr+"-"+tc]=true;
+        val*=2;
+        score+=val;
+        break;
+      }else break;
+    }
+
+    newGrid[nr][nc]=val;
+
+    let tile=tiles[r+"-"+c];
+    let p=pos(nr,nc);
+    tile.style.left=p.x+"px";
+    tile.style.top=p.y+"px";
+
+    if(nr!==r||nc!==c) moved=true;
   });
 
-  document.getElementById("leaderboard").innerHTML=html;
+  if(!moved) return;
+
+  grid=newGrid;
+  updateScore();
+
+  setTimeout(()=>{
+    game.querySelectorAll(".tile").forEach(e=>e.remove());
+    tiles={};
+
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(grid[r][c]){
+          let t=createTile(r,c,grid[r][c]);
+          if(merged[r+"-"+c]) t.classList.add("merge");
+        }
+      }
+    }
+
+    spawn();
+    checkGameOver();
+  },150);
 }
 
-/* TEST SCORE */
-let score=0;
-setInterval(()=>{
-  score+=10;
-  document.getElementById("score").innerText=score;
-  saveScore(score);
-},2000);
+function checkGameOver(){
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(!grid[r][c]) return;
+      if(c<3 && grid[r][c]===grid[r][c+1]) return;
+      if(r<3 && grid[r][c]===grid[r+1][c]) return;
+    }
+  }
+
+  document.querySelectorAll(".tile").forEach(t=>t.style.opacity="0.3");
+  document.getElementById("over").style.display="flex";
+}
+
+function restart(){
+  document.getElementById("over").style.display="none";
+  init();
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowLeft") move("left");
+  if(e.key==="ArrowRight") move("right");
+  if(e.key==="ArrowUp") move("up");
+  if(e.key==="ArrowDown") move("down");
+});
+
+let sx,sy;
+document.addEventListener("touchstart",e=>{
+  sx=e.touches[0].clientX;
+  sy=e.touches[0].clientY;
+});
+
+document.addEventListener("touchend",e=>{
+  let dx=e.changedTouches[0].clientX-sx;
+  let dy=e.changedTouches[0].clientY-sy;
+
+  if(Math.abs(dx)<30 && Math.abs(dy)<30) return;
+
+  if(Math.abs(dx)>Math.abs(dy)){
+    move(dx>0?"right":"left");
+  }else{
+    move(dy>0?"down":"up");
+  }
+});
+
+init();
 </script>
 
 </body>
