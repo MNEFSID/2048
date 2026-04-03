@@ -96,36 +96,42 @@ h1{font-family:'Fredoka';}
 
 <!-- 🔥 FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA1SxlN2devIAFSO-_iB7QEKlOtCGC9e1E",
-  authDomain: "project-6710900057226316014.firebaseapp.com",
-  projectId: "project-6710900057226316014",
+  apiKey: "AIzaSyBAw_4EbDeR-j_V8RCBvhkDtIuDH3fIZBc",
+  authDomain: "game-45646.firebaseapp.com",
+  projectId: "game-45646",
+  storageBucket: "game-45646.firebasestorage.app",
+  messagingSenderId: "488036675536",
+  appId: "1:488036675536:web:5ecea3d39f145a78e693d5"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let uid=null;
-
-onAuthStateChanged(auth, async(user)=>{
+// 🔒 CEK LOGIN
+onAuthStateChanged(auth, user => {
   if(!user){
-    location.href="index.html";
-    return;
-  }
-
-  uid = user.uid;
-
-  try{
-    loadLeaderboard();
-  }catch(e){
-    console.log(e);
+    location.href = "index.html";
+  } else {
+    window.currentUser = user; // simpan user
   }
 });
+
+// 🔥 FUNCTION SAVE SCORE
+window.saveScoreOnline = (score, best) => {
+  if(!window.currentUser) return;
+
+  setDoc(doc(db, "users", window.currentUser.uid), {
+    score: score,
+    best: best
+  });
 
 window.saveScoreOnline = async function(score){
   if(!uid) return;
@@ -242,10 +248,11 @@ function updateScore(){
     document.getElementById("best").innerText=best;
   }
 
+  // 🔥 SAVE ONLINE
   if(window.saveScoreOnline){
-    window.saveScoreOnline(score);
+    saveScoreOnline(score, best);
   }
-}
+  }
 
 function move(dir){
   let moved=false;
