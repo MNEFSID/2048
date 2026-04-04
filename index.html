@@ -2,22 +2,77 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login 2048</title>
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  width:280px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+h2{
+  margin-bottom:15px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#667eea;
+  color:white;
+  font-weight:bold;
+}
+
+button:hover{
+  opacity:0.9;
+}
+</style>
 </head>
 <body>
 
-<h2>Login / Register</h2>
+<div class="card">
+  <h2>2048 Login</h2>
 
-<input id="email" placeholder="Email"><br><br>
-<input id="pass" type="password" placeholder="Password"><br><br>
+  <input id="name" placeholder="Nama (buat leaderboard)">
+  <input id="email" placeholder="Email">
+  <input id="pass" type="password" placeholder="Password">
 
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <button onclick="login()">Login</button>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAw_4EbDeR-j_V8RCBvhkDtIuDH3fIZBc",
@@ -30,23 +85,38 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
+const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const passInput = document.getElementById("pass");
 
-// AUTO REDIRECT KALO UDAH LOGIN 🔥
+// AUTO LOGIN
 onAuthStateChanged(auth, user => {
   if(user){
     location.href = "main.html";
   }
 });
 
-window.register = () => {
-  createUserWithEmailAndPassword(auth, emailInput.value, passInput.value)
-    .then(()=> alert("Register sukses!"))
-    .catch(e=> alert(e.message));
+// REGISTER + SIMPAN NAMA 🔥
+window.register = async () => {
+  try{
+    const res = await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+
+    // simpan nama ke database
+    await setDoc(doc(db, "users", res.user.uid), {
+      name: nameInput.value,
+      score: 0,
+      best: 0
+    });
+
+    alert("Register sukses!");
+  }catch(e){
+    alert(e.message);
+  }
 };
 
+// LOGIN
 window.login = () => {
   signInWithEmailAndPassword(auth, emailInput.value, passInput.value)
     .then(()=> location.href="main.html")
