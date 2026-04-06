@@ -267,37 +267,41 @@ init();
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, update } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const app=initializeApp({
-  apiKey:"AIzaSy...",
-  authDomain:"project-4785033342589185071.firebaseapp.com",
-  databaseURL:"https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
+const auth = getAuth();
 
-const auth=getAuth(app);
-const db=getDatabase(app);
+// 🔥 tunggu auth siap
+function waitForUser(){
+  return new Promise((resolve)=>{
+    const unsub = onAuthStateChanged(auth, (user)=>{
+      unsub(); // stop listener biar gak dobel
+      resolve(user);
+    });
+  });
+}
 
-let user;
+// 🔥 jalanin setelah pasti dapet hasil
+(async () => {
+  const user = await waitForUser();
 
-onAuthStateChanged(auth, async (user) => {
-
-  if(user){
-    currentUser = user;
-    loadLeaderboard();
-  } else {
-    // kasih delay biar gak ke-trigger awal
-    setTimeout(()=>{
-      if(!auth.currentUser){
-        location.href = "index.html";
-      }
-    }, 500);
+  if(!user){
+    location.href = "index.html";
+    return;
   }
 
-});
+  // ✅ AMAN
+  currentUser = user;
+
+  // ambil data
+  const snap = await get(ref(db, "users/" + user.uid));
+  if(snap.exists()){
+    best = snap.val().score || 0;
+    bestEl.innerText = best;
+  }
+
+  loadLeaderboard();
+})();
 
 window.saveScoreOnline=(score)=>{
   update(ref(db,"users/"+user.uid),{score});
