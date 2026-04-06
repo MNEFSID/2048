@@ -283,18 +283,20 @@ const db=getDatabase(app);
 
 let user;
 
-onAuthStateChanged(auth, async(u)=>{
-  if(!u) location.href="index.html";
+onAuthStateChanged(auth, async (user) => {
 
-  user=u;
-
-  const snap=await get(ref(db,"users/"+u.uid));
-  if(snap.exists()){
-    best = snap.val().score || 0;
-    bestEl.innerText = best;
+  if(user){
+    currentUser = user;
+    loadLeaderboard();
+  } else {
+    // kasih delay biar gak ke-trigger awal
+    setTimeout(()=>{
+      if(!auth.currentUser){
+        location.href = "index.html";
+      }
+    }, 500);
   }
 
-  loadLeaderboard();
 });
 
 window.saveScoreOnline=(score)=>{
