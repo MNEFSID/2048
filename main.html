@@ -335,8 +335,6 @@ const tileSize=(gameSize-gap*(size+1))/size;
   
 let grid,tiles={},score=0;
   
-let best=localStorage.getItem("best2048")||0;
-  
 document.getElementById("best").innerText=best;
   
 
@@ -456,20 +454,20 @@ function createTile(r,c,val){
 
   
 function updateScore(){
-  
-  document.getElementById("score").innerText=score;
-  
+  document.getElementById("score").innerText = score;
 
-  
-  if(score>best){
-  
-    best=score;
-  
-    localStorage.setItem("best2048",best);
-  
-    document.getElementById("best").innerText=best;
-  
+  if(currentUser){
+    const userRef = ref(db, "users/" + currentUser.uid);
+    get(userRef).then(snap => {
+      const old = snap.val()?.score || 0;
+      if(score > old){
+        update(userRef, { score: score });
+        document.getElementById("best").innerText = score;
+        loadLeaderboard();
+      }
+    });
   }
+    }
   
 
   
@@ -764,21 +762,19 @@ let currentUser = null;
 
   
 onAuthStateChanged(auth, async (user) => {
-  
   if(!user){
-  
     location.href = "index.html";
-  
     return;
-  
   }
-  
 
-  
   currentUser = user;
-  
+
+  // Ambil best score dari Firebase
+  const snap = await get(ref(db, "users/" + user.uid));
+  let bestScore = snap.val()?.score || 0;
+  document.getElementById("best").innerText = bestScore;
+
   loadLeaderboard();
-  
 });
   
 
