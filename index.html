@@ -9,53 +9,99 @@
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
+  overflow:hidden;
 
-  /* 🔥 GRADIENT + GRID */
-  background: linear-gradient(135deg, #faf8ef, #e6dccc);
-  background-image:
-    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background: linear-gradient(135deg,#faf8ef,#e6dccc);
 
   display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
-
-  animation: bgMove 12s linear infinite;
 }
 
-/* 🔥 BACKGROUND GERAK */
-@keyframes bgMove{
-  from{
-    background-position: 0 0, 0 0;
-  }
-  to{
-    background-position: 40px 40px, 40px 40px;
-  }
+/* 🔥 GLOW */
+body::before, body::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:0.6;
 }
 
-/* CARD */
+body::before{
+  width:300px;
+  height:300px;
+  background:#edc22e;
+  top:10%;
+  left:10%;
+  animation:float 6s infinite ease-in-out;
+}
+
+body::after{
+  width:250px;
+  height:250px;
+  background:#f59563;
+  bottom:10%;
+  right:10%;
+  animation:float 8s infinite ease-in-out;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-30px);}
+}
+
+/* 🎮 TILE BACKGROUND */
+.tile-bg{
+  position:absolute;
+  width:60px;
+  height:60px;
+  border-radius:10px;
+  background:#eee4da;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  opacity:0.15;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  from{transform:translateY(-100px);}
+  to{transform:translateY(110vh);}
+}
+
+/* ✨ PARTICLES */
+.particle{
+  position:absolute;
+  width:5px;
+  height:5px;
+  background:white;
+  border-radius:50%;
+  opacity:0.3;
+  animation:particleMove linear infinite;
+}
+
+@keyframes particleMove{
+  from{transform:translateY(0);}
+  to{transform:translateY(-100vh);}
+}
+
+/* 🧊 CARD GLASS */
 .card{
-  background:#bbada0;
+  position:relative;
+  background:rgba(187,173,160,0.7);
+  backdrop-filter: blur(10px);
   padding:30px;
-  border-radius:15px;
+  border-radius:20px;
   width:300px;
   text-align:center;
-  box-shadow:0 15px 35px rgba(0,0,0,0.25);
-  animation:fadeIn .5s ease;
-  transition:.3s;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+  animation:fadeIn .6s ease;
+  z-index:10;
 }
 
-.card:hover{
-  transform:translateY(-5px);
-}
-
-/* TITLE */
-h2{
-  margin-bottom:20px;
-  color:white;
-}
+h2{color:white}
 
 /* INPUT */
 input{
@@ -65,12 +111,10 @@ input{
   border:none;
   border-radius:8px;
   outline:none;
-  transition:.2s;
 }
 
 input:focus{
   box-shadow:0 0 0 3px rgba(255,255,255,0.3);
-  transform:scale(1.03);
 }
 
 /* 🔥 BUTTON 3D */
@@ -85,11 +129,6 @@ button{
   font-weight:bold;
   cursor:pointer;
   box-shadow:0 5px 0 #6e5c4a;
-  transition:.15s;
-}
-
-button:hover{
-  transform:translateY(-1px);
 }
 
 button:active{
@@ -98,84 +137,67 @@ button:active{
 }
 
 /* LINK */
-.link{
-  margin-top:10px;
-  font-size:14px;
-  color:white;
-}
+.link{color:white; font-size:14px;}
+.link span{color:#2196f3; cursor:pointer;}
 
-.link span{
-  color:#2196f3;
-  cursor:pointer;
-  transition:.2s;
-}
+#msg{color:white; font-size:13px;}
 
-.link span:hover{
-  text-decoration:underline;
-  opacity:0.8;
-}
-
-/* MESSAGE */
-#msg{
-  margin-top:10px;
-  color:#fff;
-  font-size:13px;
-}
-
-/* ANIMASI */
 @keyframes fadeIn{
-  from{
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-.fade{
-  animation:fadeSwitch .3s ease;
-}
-
-@keyframes fadeSwitch{
-  from{opacity:0; transform:translateY(10px);}
+  from{opacity:0; transform:translateY(20px);}
   to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
 <body>
 
+<!-- 🎮 TILE BACKGROUND AUTO -->
+<script>
+for(let i=0;i<10;i++){
+  let t=document.createElement("div");
+  t.className="tile-bg";
+  t.innerText=[2,4,8,16][Math.floor(Math.random()*4)];
+  t.style.left=Math.random()*100+"vw";
+  t.style.animationDuration=(5+Math.random()*5)+"s";
+  document.body.appendChild(t);
+}
+
+/* ✨ PARTICLES */
+for(let i=0;i<25;i++){
+  let p=document.createElement("div");
+  p.className="particle";
+  p.style.left=Math.random()*100+"vw";
+  p.style.top=Math.random()*100+"vh";
+  p.style.animationDuration=(5+Math.random()*10)+"s";
+  document.body.appendChild(p);
+}
+</script>
+
 <div class="card">
 
-  <!-- LOGIN -->
-  <div id="loginBox">
-    <h2>Masuk</h2>
-    <input id="loginEmail" type="email" placeholder="Email">
-    <input id="loginPass" type="password" placeholder="Password">
+<div id="loginBox">
+<h2>Masuk</h2>
+<input id="loginEmail" type="email" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+<button onclick="login()">Masuk</button>
 
-    <button onclick="login()">Masuk</button>
+<div class="link">
+Belum punya akun? <span onclick="showRegister()">Daftar</span>
+</div>
+</div>
 
-    <div class="link">
-      Belum punya akun? <span onclick="showRegister()">Daftar</span>
-    </div>
-  </div>
+<div id="registerBox" style="display:none;">
+<h2>Daftar</h2>
+<input id="regName" placeholder="Nama">
+<input id="regEmail" type="email" placeholder="Email">
+<input id="regPass" type="password" placeholder="Password">
+<button onclick="register()">Daftar</button>
 
-  <!-- REGISTER -->
-  <div id="registerBox" style="display:none;">
-    <h2>Daftar</h2>
-    <input id="regName" placeholder="Nama">
-    <input id="regEmail" type="email" placeholder="Email">
-    <input id="regPass" type="password" placeholder="Password">
+<div class="link">
+Sudah punya akun? <span onclick="showLogin()">Masuk</span>
+</div>
+</div>
 
-    <button onclick="register()">Daftar</button>
-
-    <div class="link">
-      Sudah punya akun? <span onclick="showLogin()">Masuk</span>
-    </div>
-  </div>
-
-  <p id="msg"></p>
+<p id="msg"></p>
 
 </div>
 
@@ -200,66 +222,41 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// SWITCH UI
-window.showRegister = () => {
-  document.getElementById("loginBox").style.display="none";
-  const reg = document.getElementById("registerBox");
-  reg.style.display="block";
-  reg.classList.add("fade");
+window.showRegister=()=>{
+  loginBox.style.display="none";
+  registerBox.style.display="block";
 }
 
-window.showLogin = () => {
-  document.getElementById("registerBox").style.display="none";
-  const log = document.getElementById("loginBox");
-  log.style.display="block";
-  log.classList.add("fade");
+window.showLogin=()=>{
+  registerBox.style.display="none";
+  loginBox.style.display="block";
 }
 
-// REGISTER
-window.register = async function(){
-  const name = document.getElementById("regName").value.trim();
-  const email = document.getElementById("regEmail").value.trim();
-  const pass = document.getElementById("regPass").value.trim();
+window.register=async()=>{
+  const name=regName.value.trim();
+  const email=regEmail.value.trim();
+  const pass=regPass.value.trim();
 
-  if(!name){
-    document.getElementById("msg").innerText = "Nama wajib diisi!";
-    return;
-  }
+  if(!name){msg.innerText="Nama wajib!"; return;}
 
   try{
-    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-    const user = userCred.user;
-
-    await set(ref(db, "users/" + user.uid), {
-      name: name,
-      email: email,
-      score: 0
+    const u=await createUserWithEmailAndPassword(auth,email,pass);
+    await set(ref(db,"users/"+u.user.uid),{
+      name,email,score:0
     });
-
-    document.getElementById("msg").innerText = "Register berhasil!";
-  }catch(err){
-    document.getElementById("msg").innerText = err.message;
-  }
+    msg.innerText="Berhasil daftar!";
+  }catch(e){msg.innerText=e.message;}
 }
 
-// LOGIN
-window.login = async function(){
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPass").value.trim();
-
+window.login=async()=>{
   try{
-    await signInWithEmailAndPassword(auth, email, pass);
-    location.href = "main.html";
-  }catch(err){
-    document.getElementById("msg").innerText = err.message;
-  }
+    await signInWithEmailAndPassword(auth,loginEmail.value.trim(),loginPass.value.trim());
+    location.href="main.html";
+  }catch(e){msg.innerText=e.message;}
 }
 
-// AUTO LOGIN
-onAuthStateChanged(auth, user=>{
-  if(user){
-    location.href = "main.html";
-  }
+onAuthStateChanged(auth,u=>{
+  if(u) location.href="main.html";
 });
 </script>
 
