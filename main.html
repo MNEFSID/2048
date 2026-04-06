@@ -54,15 +54,36 @@ h1{margin-top:15px}
   justify-content:center;
   align-items:center;
   font-weight:bold;
+  transition:.15s;
 }
 
-/* TILE WARNA */
+/* ANIMASI */
+.spawn{animation:pop .2s;}
+.merge{animation:merge .2s;}
+
+@keyframes pop{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
+
+@keyframes merge{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2);}
+  100%{transform:scale(1);}
+}
+
+/* WARNA TILE */
 .tile[data-val="2"]{background:#eee4da;}
 .tile[data-val="4"]{background:#ede0c8;}
 .tile[data-val="8"]{background:#f2b179;color:#fff;}
 .tile[data-val="16"]{background:#f59563;color:#fff;}
 .tile[data-val="32"]{background:#f67c5f;color:#fff;}
 .tile[data-val="64"]{background:#f65e3b;color:#fff;}
+.tile[data-val="128"]{background:#edcf72;color:#fff;}
+.tile[data-val="256"]{background:#edcc61;color:#fff;}
+.tile[data-val="512"]{background:#edc850;color:#fff;}
+.tile[data-val="1024"]{background:#edc53f;color:#fff;}
+.tile[data-val="2048"]{background:#edc22e;color:#fff;}
 
 /* CONTROL */
 #controls{
@@ -82,7 +103,6 @@ h1{margin-top:15px}
   cursor:pointer;
   box-shadow:0 5px 0 #6e5c4a;
 }
-
 .ctrl:active{
   transform:translateY(4px);
   box-shadow:0 2px 0 #6e5c4a;
@@ -127,7 +147,6 @@ h1{margin-top:15px}
 
 <div id="game"></div>
 
-<!-- CONTROL CROSS -->
 <div id="controls">
   <div></div>
   <button class="ctrl" onclick="move('up')">↑</button>
@@ -146,14 +165,12 @@ h1{margin-top:15px}
 
 <button class="logout" onclick="logout()">Logout</button>
 
-<!-- GAME LOGIC (GAK DIUBAH) -->
 <script>
 const game=document.getElementById("game");
-const size=4, gameSize=320, gap=10;
+const size=4, gap=10, gameSize=320;
 const tileSize=(gameSize-gap*(size+1))/size;
 
-let grid,tiles={},score=0;
-let best=0; // 🔥 dari firebase
+let grid,score=0,best=0;
 
 function pos(r,c){
   return{
@@ -165,7 +182,7 @@ function pos(r,c){
 function init(){
   grid=Array(size).fill().map(()=>Array(size).fill(0));
   game.innerHTML="";
-  tiles={}; score=0; updateScore();
+  score=0; updateScore();
 
   for(let r=0;r<size;r++){
     for(let c=0;c<size;c++){
@@ -193,12 +210,14 @@ function spawn(){
   let val=Math.random()<0.9?2:4;
   grid[r][c]=val;
 
-  createTile(r,c,val);
+  createTile(r,c,val,true);
 }
 
-function createTile(r,c,val){
+function createTile(r,c,val,spawnAnim=false){
   let t=document.createElement("div");
   t.className="tile";
+  if(spawnAnim) t.classList.add("spawn");
+
   t.innerText=val;
   t.dataset.val=val;
 
@@ -207,7 +226,6 @@ function createTile(r,c,val){
   t.style.top=p.y+"px";
 
   game.appendChild(t);
-  tiles[r+"-"+c]=t;
 }
 
 function updateScore(){
@@ -216,46 +234,80 @@ function updateScore(){
   if(score>best){
     best=score;
     bestEl.innerText=best;
+    if(window.saveScoreOnline) window.saveScoreOnline(best);
+  }
+}
 
-    if(window.saveScoreOnline){
-      window.saveScoreOnline(best);
+function slide(row){
+  row=row.filter(v=>v);
+  for(let i=0;i<row.length-1;i++){
+    if(row[i]==row[i+1]){
+      row[i]*=2;
+      score+=row[i];
+      row[i+1]=0;
     }
   }
+  return row.filter(v=>v);
 }
 
 function move(dir){
   let moved=false;
-  let newGrid=Array(size).fill().map(()=>Array(size).fill(0));
 
-  for(let r=0;r<size;r++){
-    for(let c=0;c<size;c++){
-      if(!grid[r][c]) continue;
-      let nr=r,nc=c,val=grid[r][c];
+  for(let i=0;i<size;i++){
+    let row;
 
-      if(dir=="left") nc=0;
-      if(dir=="right") nc=3;
-      if(dir=="up") nr=0;
-      if(dir=="down") nr=3;
+    if(dir=="left"){
+      row=slide(grid[i]);
+      while(row.length<size) row.push(0);
+      if(grid[i].toString()!=row.toString()) moved=true;
+      grid[i]=row;
+    }
 
-      if(newGrid[nr][nc]==0){
-        newGrid[nr][nc]=val;
-        moved=true;
+    if(dir=="right"){
+      row=slide(grid[i].slice().reverse());
+      while(row.length<size) row.push(0);
+      row=row.reverse();
+      if(grid[i].toString()!=row.toString()) moved=true;
+      grid[i]=row;
+    }
+
+    if(dir=="up"){
+      row=slide(grid.map(r=>r[i]));
+      while(row.length<size) row.push(0);
+      for(let j=0;j<size;j++){
+        if(grid[j][i]!=row[j]) moved=true;
+        grid[j][i]=row[j];
+      }
+    }
+
+    if(dir=="down"){
+      row=slide(grid.map(r=>r[i]).reverse());
+      while(row.length<size) row.push(0);
+      row=row.reverse();
+      for(let j=0;j<size;j++){
+        if(grid[j][i]!=row[j]) moved=true;
+        grid[j][i]=row[j];
       }
     }
   }
 
   if(!moved) return;
-  grid=newGrid;
+
   updateScore();
-
-  game.querySelectorAll(".tile").forEach(e=>e.remove());
-  tiles={};
-
-  for(let r=0;r<size;r++)
-    for(let c=0;c<size;c++)
-      if(grid[r][c]) createTile(r,c,grid[r][c]);
-
+  redraw();
   spawn();
+}
+
+function redraw(){
+  game.querySelectorAll(".tile").forEach(e=>e.remove());
+
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(grid[r][c]){
+        createTile(r,c,grid[r][c]);
+      }
+    }
+  }
 }
 
 const scoreEl=document.getElementById("score");
@@ -267,41 +319,40 @@ init();
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, update } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const auth = getAuth();
+const app=initializeApp({
+  apiKey:"AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
+  authDomain:"project-4785033342589185071.firebaseapp.com",
+  databaseURL:"https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
 
-// 🔥 tunggu auth siap
-function waitForUser(){
-  return new Promise((resolve)=>{
-    const unsub = onAuthStateChanged(auth, (user)=>{
-      unsub(); // stop listener biar gak dobel
-      resolve(user);
-    });
-  });
-}
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-// 🔥 jalanin setelah pasti dapet hasil
-(async () => {
-  const user = await waitForUser();
+let user;
 
-  if(!user){
-    location.href = "index.html";
+onAuthStateChanged(auth, async(u)=>{
+  if(!u){
+    setTimeout(()=>{
+      if(!auth.currentUser) location.href="index.html";
+    },500);
     return;
   }
 
-  // ✅ AMAN
-  currentUser = user;
+  user=u;
 
-  // ambil data
-  const snap = await get(ref(db, "users/" + user.uid));
+  const snap=await get(ref(db,"users/"+u.uid));
   if(snap.exists()){
-    best = snap.val().score || 0;
-    bestEl.innerText = best;
+    best=snap.val().score||0;
+    bestEl.innerText=best;
   }
 
   loadLeaderboard();
-})();
+});
 
 window.saveScoreOnline=(score)=>{
   update(ref(db,"users/"+user.uid),{score});
@@ -311,8 +362,9 @@ window.logout=()=>signOut(auth).then(()=>location.href="index.html");
 
 async function loadLeaderboard(){
   const snap=await get(ref(db,"users"));
-  let data=Object.values(snap.val());
+  if(!snap.exists()) return;
 
+  let data=Object.values(snap.val());
   data.sort((a,b)=>b.score-a.score);
 
   let html="<b>Leaderboard</b><br>";
