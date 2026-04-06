@@ -290,21 +290,40 @@ button:active{
   
   }
   
-</style></head><body><br><h1>2048</h1><button onclick="logout()">Logout</button>
+</style>
+</head>
 
-<div id="controls">  <div></div><button class="ctrl" onclick="move('up')">▲</button>
+<body>
 
-  <div></div><button class="ctrl" onclick="move('left')">◀</button>
+<h1>2048</h1>
+  
+<div id="scoreBox">
+  <div class="box">Score<br><span id="score">0</span></div>
+  <div class="box">Best<br><span id="best">0</span></div>
+</div>
 
-<button class="ctrl" onclick="move('down')">▼</button>
+<div id="game"></div>
 
-<button class="ctrl" onclick="move('right')">▶</button>
+<!-- CONTROL CROSS -->
+<div id="controls">
+  <div></div>
+  <button class="ctrl" onclick="move('up')">↑</button>
+  <div></div>
 
-</div><div id="scoreBox">  <div class="box">Score<br><span id="score">0</span></div>  <div class="box">Best<br><span id="best">0</span></div></div><div id="game">  <div id="over">Game Over
+  <button class="ctrl" onclick="move('left')">←</button>
+  <div></div>
+  <button class="ctrl" onclick="move('right')">→</button>
 
-<button onclick="restart()">Restart</button>
+  <div></div>
+  <button class="ctrl" onclick="move('down')">↓</button>
+  <div></div>
+</div>
 
-  </div></div><div id="leaderboard">Loading leaderboard...</div><!-- 🎮 GAME ASLI (GAK DIUBAH) --><script>
+<div id="leaderboard">Loading...</div>
+
+<button class="logout" onclick="logout()">Logout</button>
+<!-- 🎮 GAME ASLI (GAK DIUBAH) -->
+<script>
   
 const game=document.getElementById("game");
   
