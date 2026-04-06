@@ -16,13 +16,21 @@ body{
   height:100vh;
 }
 
+/* CARD */
 .card{
   background:#bbada0;
   padding:30px;
   border-radius:15px;
   width:300px;
   text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  box-shadow:0 15px 35px rgba(0,0,0,0.2);
+  animation:fadeIn .5s ease;
+  transition:.3s;
+}
+
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.25);
 }
 
 h2{
@@ -30,6 +38,7 @@ h2{
   color:white;
 }
 
+/* INPUT */
 input{
   width:100%;
   padding:10px;
@@ -37,24 +46,39 @@ input{
   border:none;
   border-radius:8px;
   outline:none;
+  transition:.2s;
 }
 
+input:focus{
+  box-shadow:0 0 0 3px rgba(255,255,255,0.3);
+  transform:scale(1.02);
+}
+
+/* 🔥 BUTTON 3D */
 button{
   width:100%;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   background:#8f7a66;
   color:white;
   font-weight:bold;
   cursor:pointer;
+  box-shadow:0 5px 0 #6e5c4a;
+  transition:.15s;
 }
 
 button:hover{
-  background:#7a6855;
+  transform:translateY(-1px);
 }
 
+button:active{
+  transform:translateY(3px);
+  box-shadow:0 2px 0 #6e5c4a;
+}
+
+/* LINK */
 .link{
   margin-top:10px;
   font-size:14px;
@@ -64,12 +88,33 @@ button:hover{
 .link span{
   color:#2196f3;
   cursor:pointer;
+  transition:.2s;
+}
+
+.link span:hover{
+  text-decoration:underline;
+  opacity:0.8;
 }
 
 #msg{
   margin-top:10px;
   color:#fff;
   font-size:13px;
+}
+
+/* ANIMASI */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.fade{
+  animation:fadeSwitch .3s ease;
+}
+
+@keyframes fadeSwitch{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -80,7 +125,7 @@ button:hover{
   <!-- LOGIN -->
   <div id="loginBox">
     <h2>Masuk</h2>
-    <input id="loginEmail" placeholder="Email">
+    <input id="loginEmail" type="email" placeholder="Email">
     <input id="loginPass" type="password" placeholder="Password">
 
     <button onclick="login()">Masuk</button>
@@ -94,7 +139,7 @@ button:hover{
   <div id="registerBox" style="display:none;">
     <h2>Daftar</h2>
     <input id="regName" placeholder="Nama">
-    <input id="regEmail" placeholder="Email">
+    <input id="regEmail" type="email" placeholder="Email">
     <input id="regPass" type="password" placeholder="Password">
 
     <button onclick="register()">Daftar</button>
@@ -132,19 +177,23 @@ const db = getDatabase(app);
 // SWITCH UI
 window.showRegister = () => {
   document.getElementById("loginBox").style.display="none";
-  document.getElementById("registerBox").style.display="block";
+  const reg = document.getElementById("registerBox");
+  reg.style.display="block";
+  reg.classList.add("fade");
 }
 
 window.showLogin = () => {
-  document.getElementById("loginBox").style.display="block";
   document.getElementById("registerBox").style.display="none";
+  const log = document.getElementById("loginBox");
+  log.style.display="block";
+  log.classList.add("fade");
 }
 
 // REGISTER
 window.register = async function(){
-  const name = document.getElementById("regName").value;
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const pass = document.getElementById("regPass").value.trim();
 
   if(!name){
     document.getElementById("msg").innerText = "Nama wajib diisi!";
@@ -155,7 +204,6 @@ window.register = async function(){
     const userCred = await createUserWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
 
-    // 🔥 simpan nama buat leaderboard
     await set(ref(db, "users/" + user.uid), {
       name: name,
       email: email,
@@ -170,8 +218,8 @@ window.register = async function(){
 
 // LOGIN
 window.login = async function(){
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
 
   try{
     await signInWithEmailAndPassword(auth, email, pass);
