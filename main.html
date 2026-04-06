@@ -228,70 +228,79 @@ function createTile(r,c,val,spawnAnim=false){
   game.appendChild(t);
 }
 
-function updateScore(){
-  scoreEl.innerText=score;
-
-  if(score>best){
-    best=score;
-    bestEl.innerText=best;
-    if(window.saveScoreOnline) window.saveScoreOnline(best);
-  }
-}
-
-function slide(row){
-  row=row.filter(v=>v);
-  for(let i=0;i<row.length-1;i++){
-    if(row[i]==row[i+1]){
-      row[i]*=2;
-      score+=row[i];
-      row[i+1]=0;
-    }
-  }
-  return row.filter(v=>v);
-}
-
 function move(dir){
   let moved=false;
+  let newGrid=Array(size).fill().map(()=>Array(size).fill(0));
+  let merged={};
 
-  for(let i=0;i<size;i++){
-    let row;
+  let order=[];
+  for(let r=0;r<size;r++)
+    for(let c=0;c<size;c++)
+      order.push({r,c});
 
-    if(dir=="left"){
-      row=slide(grid[i]);
-      while(row.length<size) row.push(0);
-      if(grid[i].toString()!=row.toString()) moved=true;
-      grid[i]=row;
+  if(dir==="right"||dir==="down") order.reverse();
+
+  order.forEach(({r,c})=>{
+    let val=grid[r][c];
+    if(!val) return;
+
+    let nr=r,nc=c;
+
+    while(true){
+      let tr=nr,tc=nc;
+      if(dir==="left") tc--;
+      if(dir==="right") tc++;
+      if(dir==="up") tr--;
+      if(dir==="down") tr++;
+
+      if(tr<0||tr>=size||tc<0||tc>=size) break;
+
+      if(newGrid[tr][tc]===0){
+        nr=tr; nc=tc;
+      }else if(newGrid[tr][tc]===val && !merged[tr+"-"+tc]){
+        nr=tr; nc=tc;
+        merged[tr+"-"+tc]=true;
+        val*=2;
+        score+=val;
+        break;
+      }else break;
     }
 
-    if(dir=="right"){
-      row=slide(grid[i].slice().reverse());
-      while(row.length<size) row.push(0);
-      row=row.reverse();
-      if(grid[i].toString()!=row.toString()) moved=true;
-      grid[i]=row;
-    }
+    newGrid[nr][nc]=val;
 
-    if(dir=="up"){
-      row=slide(grid.map(r=>r[i]));
-      while(row.length<size) row.push(0);
-      for(let j=0;j<size;j++){
-        if(grid[j][i]!=row[j]) moved=true;
-        grid[j][i]=row[j];
-      }
-    }
+    let tile=tiles[r+"-"+c];
+    let p=pos(nr,nc);
 
-    if(dir=="down"){
-      row=slide(grid.map(r=>r[i]).reverse());
-      while(row.length<size) row.push(0);
-      row=row.reverse();
-      for(let j=0;j<size;j++){
-        if(grid[j][i]!=row[j]) moved=true;
-        grid[j][i]=row[j];
-      }
-    }
-  }
+    // 🔥 INI YANG BIKIN SMOOTH
+    tile.style.transition = "all 0.2s ease";
+    tile.style.left = p.x+"px";
+    tile.style.top = p.y+"px";
+
+    if(nr!==r||nc!==c) moved=true;
+  });
 
   if(!moved) return;
+
+  grid=newGrid;
+  updateScore();
+
+  // ⏱️ TUNGGU ANIMASI SELESAI BARU REFRESH
+  setTimeout(()=>{
+    game.querySelectorAll(".tile").forEach(e=>e.remove());
+    tiles={};
+
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(grid[r][c]){
+          let t=createTile(r,c,grid[r][c]);
+          if(merged[r+"-"+c]) t.classList.add("merge");
+        }
+      }
+    }
+
+    spawn();
+  },200); // ⬅️ sama dengan duration CSS
+  }
 
   updateScore();
   redraw();
