@@ -79,9 +79,8 @@ h1{font-family:'Fredoka';}
 <body>
 
 <h1>2048</h1>
-  
-<button onclick="logout()" style="margin-bottom:10px;">Logout</button>
-  
+<button onclick="logout()">Logout</button>
+
 <div id="scoreBox">
   <div class="box">Score<br><span id="score">0</span></div>
   <div class="box">Best<br><span id="best">0</span></div>
@@ -96,85 +95,7 @@ h1{font-family:'Fredoka';}
 
 <div id="leaderboard">Loading leaderboard...</div>
 
-<!-- 🔥 FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } 
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBAw_4EbDeR-j_V8RCBvhkDtIuDH3fIZBc",
-  authDomain: "game-45646.firebaseapp.com",
-  projectId: "game-45646",
-  storageBucket: "game-45646.firebasestorage.app",
-  messagingSenderId: "488036675536",
-  appId: "1:488036675536:web:5ecea3d39f145a78e693d5"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// 🔒 CEK LOGIN
-onAuthStateChanged(auth, user => {
-  if(!user){
-    location.href = "index.html";
-  } else {
-    window.currentUser = user; // simpan user
-  }
-});
-
-// 🔥 FUNCTION SAVE SCORE
-window.saveScoreOnline = (score, best) => {
-  if(!window.currentUser) return;
-
-  setDoc(doc(db, "users", window.currentUser.uid), {
-    score: score,
-    best: best
-  });
-
-window.saveScoreOnline = async function(score){
-  if(!uid) return;
-
-  try{
-    const ref = doc(db,"users",uid);
-    const snap = await getDoc(ref);
-
-    let old = snap.data()?.score || 0;
-
-    if(score > old){
-      await updateDoc(ref,{score});
-      loadLeaderboard();
-    }
-  }catch(e){
-    console.log("save error",e);
-  }
-};
-
-async function loadLeaderboard(){
-  try{
-    const snap = await getDocs(collection(db,"users"));
-
-    let data=[];
-    snap.forEach(d=>data.push(d.data()));
-
-    data.sort((a,b)=>b.score-a.score);
-
-    let html="<b>Leaderboard</b><br>";
-    data.slice(0,5).forEach((d,i)=>{
-      html+=`${i+1}. ${d.name} - ${d.score}<br>`;
-    });
-
-    document.getElementById("leaderboard").innerHTML=html;
-  }catch(e){
-    document.getElementById("leaderboard").innerText="Leaderboard error";
-  }
-}
-</script>
-
-<!-- 🎮 GAME LU (ASLI + ONLINE) -->
+<!-- 🎮 GAME ASLI (GAK DIUBAH) -->
 <script>
 const game=document.getElementById("game");
 const size=4, gameSize=320, gap=10;
@@ -250,16 +171,11 @@ function updateScore(){
     document.getElementById("best").innerText=best;
   }
 
-  // 🔥 SIMPAN ONLINE
+  // 🔥 CONNECT KE FIREBASE (TAMBAHAN DOANG)
   if(window.saveScoreOnline){
     window.saveScoreOnline(score);
   }
-  }
-  // 🔥 SAVE ONLINE
-  if(window.saveScoreOnline){
-    saveScoreOnline(score, best);
-  }
-  }
+}
 
 function move(dir){
   let moved=false;
@@ -377,6 +293,9 @@ document.addEventListener("touchend",e=>{
 });
 
 init();
+</script>
+
+<!-- 🔥 FIREBASE FIX -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } 
@@ -384,7 +303,6 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, update } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// CONFIG LU
 const firebaseConfig = {
   apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
   authDomain: "project-4785033342589185071.firebaseapp.com",
@@ -401,49 +319,52 @@ const db = getDatabase(app);
 
 let currentUser = null;
 
-// CEK LOGIN
 onAuthStateChanged(auth, async (user) => {
   if(!user){
-    window.location.href = "index.html";
+    location.href = "index.html";
     return;
   }
 
   currentUser = user;
-
-  // ambil data user
-  const snap = await get(ref(db, "users/" + user.uid));
-  if(snap.exists()){
-    const data = snap.val();
-    console.log("User data:", data);
-  }
+  loadLeaderboard();
 });
 
-// SAVE SCORE KE FIREBASE
 window.saveScoreOnline = function(score){
   if(!currentUser) return;
 
   const userRef = ref(db, "users/" + currentUser.uid);
 
   get(userRef).then(snap=>{
-    if(!snap.exists()) return;
+    const old = snap.val()?.score || 0;
 
-    const data = snap.val();
-    const bestScore = data.score || 0;
-
-    if(score > bestScore){
-      update(userRef, {
-        score: score
-      });
+    if(score > old){
+      update(userRef, { score: score });
+      loadLeaderboard();
     }
   });
-}
+};
 
-// LOGOUT
 window.logout = function(){
   signOut(auth).then(()=>{
-    window.location.href = "index.html";
+    location.href = "index.html";
   });
+};
+
+async function loadLeaderboard(){
+  const snap = await get(ref(db, "users"));
+  if(!snap.exists()) return;
+
+  let data = Object.values(snap.val());
+  data.sort((a,b)=>b.score - a.score);
+
+  let html = "<b>Leaderboard</b><br>";
+  data.slice(0,5).forEach((d,i)=>{
+    html += `${i+1}. ${d.email || "Player"} - ${d.score}<br>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
 }
 </script>
+
 </body>
 </html>
