@@ -137,10 +137,28 @@ button:active{
   transition:.1s;
 }
 
-.ctrl:active{
-  transform:translateY(4px);
-  box-shadow:0 2px 0 #6e5c4a;
+.ctrl{
+  height:60px;
+  font-size:22px;
+  background:#cdc1b4;
+  color:#333;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,0.5),
+    0 4px 0 #a39489;
+
+  transition:.1s;
 }
+
+.ctrl:active{
+  transform:translateY(3px);
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,0.5),
+    0 1px 0 #a39489;
+  }
   
 .spawn{
   animation:pop .2s;
@@ -152,12 +170,24 @@ button:active{
   }
 </style>
 </head>
-<body>
+<body
 
-<br>
 <h1>2048</h1>
-<button onclick="logout()">Logout</button>
 
+<div id="scoreBox">
+  <div class="box">Score<br><span id="score">0</span></div>
+  <div class="box">Best<br><span id="best">0</span></div>
+</div>
+
+<!-- 🎮 GAME -->
+<div id="game">
+  <div id="over">
+    Game Over
+    <button onclick="restart()">Restart</button>
+  </div>
+</div>
+
+<!-- 🎮 CONTROL DI BAWAH GAME -->
 <div id="controls">
   <div></div>
   <button class="ctrl" onclick="move('up')">▲</button>
@@ -167,21 +197,12 @@ button:active{
   <button class="ctrl" onclick="move('down')">▼</button>
   <button class="ctrl" onclick="move('right')">▶</button>
 </div>
-  
-<div id="scoreBox">
-  <div class="box">Score<br><span id="score">0</span></div>
-  <div class="box">Best<br><span id="best">0</span></div>
-</div>
 
-<div id="game">
-  <div id="over">
-    Game Over
-    <button onclick="restart()">Restart</button>
-  </div>
-</div>
-
+<!-- 🏆 LEADERBOARD -->
 <div id="leaderboard">Loading leaderboard...</div>
 
+<!-- 🚪 LOGOUT PALING BAWAH -->
+<button onclick="logout()" style="margin:20px 0;">Logout</button>
 <!-- 🎮 GAME ASLI (GAK DIUBAH) -->
 <script>
 const game=document.getElementById("game");
