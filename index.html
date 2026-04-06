@@ -7,121 +7,114 @@
 
 <style>
 body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-family:Arial;
-  background:linear-gradient(135deg,#667eea,#764ba2);
-}
-
-.card{
-  background:white;
-  padding:25px;
-  border-radius:15px;
-  width:280px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  font-family: Arial;
+  background:#121212;
+  color:white;
   text-align:center;
-}
-
-h2{
-  margin-bottom:15px;
+  padding-top:100px;
 }
 
 input{
-  width:100%;
   padding:10px;
-  margin:6px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  outline:none;
+  margin:5px;
+  width:250px;
+  border:none;
+  border-radius:5px;
 }
 
 button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
+  padding:10px 20px;
+  margin:5px;
   border:none;
-  border-radius:8px;
-  background:#667eea;
+  border-radius:5px;
+  background:#00c853;
   color:white;
-  font-weight:bold;
+  cursor:pointer;
 }
 
 button:hover{
-  opacity:0.9;
+  background:#00a844;
 }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>2048 Login</h2>
+<h2>Login / Register 2048</h2>
 
-  <input id="name" placeholder="Nama (buat leaderboard)">
-  <input id="email" placeholder="Email">
-  <input id="pass" type="password" placeholder="Password">
+<input id="email" placeholder="Email"><br>
+<input id="pass" type="password" placeholder="Password"><br>
 
-  <button onclick="register()">Register</button>
-  <button onclick="login()">Login</button>
-</div>
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } 
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// CONFIG LU
 const firebaseConfig = {
-  apiKey: "AIzaSyBAw_4EbDeR-j_V8RCBvhkDtIuDH3fIZBc",
-  authDomain: "game-45646.firebaseapp.com",
-  projectId: "game-45646",
-  storageBucket: "game-45646.firebasestorage.app",
-  messagingSenderId: "488036675536",
-  appId: "1:488036675536:web:5ecea3d39f145a78e693d5"
+  apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
+  authDomain: "project-4785033342589185071.firebaseapp.com",
+  databaseURL: "https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "project-4785033342589185071",
+  storageBucket: "project-4785033342589185071.firebasestorage.app",
+  messagingSenderId: "933405535534",
+  appId: "1:933405535534:web:2979b14d5a070205e31ebf",
+  measurementId: "G-JM5PB1VPKH"
 };
 
+// INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
-const nameInput = document.getElementById("name");
-const emailInput = document.getElementById("email");
-const passInput = document.getElementById("pass");
+// REGISTER
+window.register = function(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
 
-// AUTO LOGIN
-onAuthStateChanged(auth, user => {
-  if(user){
-    location.href = "main.html";
-  }
-});
+  createUserWithEmailAndPassword(auth, email, pass)
+  .then((userCred) => {
+    const user = userCred.user;
 
-// REGISTER + SIMPAN NAMA 🔥
-window.register = async () => {
-  try{
-    const res = await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
-
-    // simpan nama ke database
-    await setDoc(doc(db, "users", res.user.uid), {
-      name: nameInput.value,
-      score: 0,
-      best: 0
+    // simpan ke realtime db
+    set(ref(db, "users/" + user.uid), {
+      email: email,
+      score: 0
     });
 
-    alert("Register sukses!");
-  }catch(e){
-    alert(e.message);
-  }
-};
+    document.getElementById("msg").innerText = "Register sukses!";
+  })
+  .catch(err => {
+    document.getElementById("msg").innerText = err.message;
+  });
+}
 
 // LOGIN
-window.login = () => {
-  signInWithEmailAndPassword(auth, emailInput.value, passInput.value)
-    .then(()=> location.href="main.html")
-    .catch(e=> alert(e.message));
-};
+window.login = function(){
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("pass").value;
+
+  signInWithEmailAndPassword(auth, email, pass)
+  .then(() => {
+    window.location.href = "main.html";
+  })
+  .catch(err => {
+    document.getElementById("msg").innerText = err.message;
+  });
+}
+
+// AUTO LOGIN
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    window.location.href = "main.html";
+  }
+});
 </script>
 
 </body>
