@@ -74,13 +74,86 @@ h1{font-family:'Fredoka';}
   flex-direction:column;
   z-index:999;
 }
+  
+  /* 🎮 TILE WARNA */
+.tile[data-val="2"]{background:#eee4da;}
+.tile[data-val="4"]{background:#ede0c8;}
+.tile[data-val="8"]{background:#f2b179;color:white;}
+.tile[data-val="16"]{background:#f59563;color:white;}
+.tile[data-val="32"]{background:#f67c5f;color:white;}
+.tile[data-val="64"]{background:#f65e3b;color:white;}
+.tile[data-val="128"]{background:#edcf72;color:white;}
+.tile[data-val="256"]{background:#edcc61;color:white;}
+.tile[data-val="512"]{background:#edc850;color:white;}
+.tile[data-val="1024"]{background:#edc53f;color:white;}
+.tile[data-val="2048"]{background:#edc22e;color:white;}
+
+/* 🎮 LEADERBOARD BOX */
+#leaderboard{
+  margin-top:15px;
+  background:#bbada0;
+  padding:10px;
+  border-radius:10px;
+  color:white;
+  width:300px;
+}
+
+/* 🔥 BUTTON 3D */
+button{
+  border:none;
+  border-radius:10px;
+  padding:10px;
+  background:#8f7a66;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 5px 0 #6e5c4a;
+  transition:.1s;
+}
+
+button:active{
+  transform:translateY(3px);
+  box-shadow:0 2px 0 #6e5c4a;
+}
+
+/* 🎮 CONTROL */
+#controls{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(3,60px);
+  gap:5px;
+  justify-content:center;
+}
+
+.ctrl{
+  font-size:18px;
+}
+.spawn{
+  animation:pop .2s;
+}
+
+@keyframes pop{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+  }
 </style>
 </head>
 <body>
 
+<br>
 <h1>2048</h1>
 <button onclick="logout()">Logout</button>
 
+<div id="controls">
+  <div></div>
+  <button class="ctrl" onclick="move('up')">⬆️</button>
+  <div></div>
+
+  <button class="ctrl" onclick="move('left')">⬅️</button>
+  <button class="ctrl" onclick="move('down')">⬇️</button>
+  <button class="ctrl" onclick="move('right')">➡️</button>
+</div>
+  
 <div id="scoreBox">
   <div class="box">Score<br><span id="score">0</span></div>
   <div class="box">Best<br><span id="best">0</span></div>
@@ -359,7 +432,7 @@ async function loadLeaderboard(){
 
   let html = "<b>Leaderboard</b><br>";
   data.slice(0,5).forEach((d,i)=>{
-    html += `${i+1}. ${d.email || "Player"} - ${d.score}<br>`;
+    html += `${i+1}. ${d.name || "Player"} - ${d.score}<br>`;
   });
 
   document.getElementById("leaderboard").innerHTML = html;
