@@ -79,11 +79,11 @@ window.register = function(){
   const pass = document.getElementById("pass").value;
 
   createUserWithEmailAndPassword(auth, email, pass)
-  .then((userCred) => {
+  .then(async (userCred) => {
     const user = userCred.user;
 
-    // simpan ke realtime db
-    set(ref(db, "users/" + user.uid), {
+    // 🔥 WAJIB: simpan ke database
+    await set(ref(db, "users/" + user.uid), {
       email: email,
       score: 0
     });
@@ -93,7 +93,7 @@ window.register = function(){
   .catch(err => {
     document.getElementById("msg").innerText = err.message;
   });
-}
+  }
 
 // LOGIN
 window.login = function(){
