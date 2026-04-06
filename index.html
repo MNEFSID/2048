@@ -9,11 +9,30 @@
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
-  background:#faf8ef;
+
+  /* 🔥 GRADIENT + GRID */
+  background: linear-gradient(135deg, #faf8ef, #e6dccc);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+
   display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
+
+  animation: bgMove 12s linear infinite;
+}
+
+/* 🔥 BACKGROUND GERAK */
+@keyframes bgMove{
+  from{
+    background-position: 0 0, 0 0;
+  }
+  to{
+    background-position: 40px 40px, 40px 40px;
+  }
 }
 
 /* CARD */
@@ -23,16 +42,16 @@ body{
   border-radius:15px;
   width:300px;
   text-align:center;
-  box-shadow:0 15px 35px rgba(0,0,0,0.2);
+  box-shadow:0 15px 35px rgba(0,0,0,0.25);
   animation:fadeIn .5s ease;
   transition:.3s;
 }
 
 .card:hover{
-  transform:translateY(-3px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.25);
+  transform:translateY(-5px);
 }
 
+/* TITLE */
 h2{
   margin-bottom:20px;
   color:white;
@@ -51,7 +70,7 @@ input{
 
 input:focus{
   box-shadow:0 0 0 3px rgba(255,255,255,0.3);
-  transform:scale(1.02);
+  transform:scale(1.03);
 }
 
 /* 🔥 BUTTON 3D */
@@ -74,7 +93,7 @@ button:hover{
 }
 
 button:active{
-  transform:translateY(3px);
+  transform:translateY(4px);
   box-shadow:0 2px 0 #6e5c4a;
 }
 
@@ -96,6 +115,7 @@ button:active{
   opacity:0.8;
 }
 
+/* MESSAGE */
 #msg{
   margin-top:10px;
   color:#fff;
@@ -104,8 +124,14 @@ button:active{
 
 /* ANIMASI */
 @keyframes fadeIn{
-  from{opacity:0; transform:translateY(20px);}
-  to{opacity:1; transform:translateY(0);}
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .fade{
