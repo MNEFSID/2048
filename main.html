@@ -118,16 +118,30 @@ button:active{
 
 /* 🎮 CONTROL */
 #controls{
-  margin-top:10px;
+  margin-top:15px;
   display:grid;
-  grid-template-columns:repeat(3,60px);
-  gap:5px;
+  grid-template-columns:repeat(3,70px);
+  gap:8px;
   justify-content:center;
 }
 
 .ctrl{
-  font-size:18px;
+  height:60px;
+  font-size:22px;
+  background:#8f7a66;
+  color:white;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 6px 0 #6e5c4a;
+  transition:.1s;
 }
+
+.ctrl:active{
+  transform:translateY(4px);
+  box-shadow:0 2px 0 #6e5c4a;
+}
+  
 .spawn{
   animation:pop .2s;
 }
@@ -146,12 +160,12 @@ button:active{
 
 <div id="controls">
   <div></div>
-  <button class="ctrl" onclick="move('up')">⬆️</button>
+  <button class="ctrl" onclick="move('up')">▲</button>
   <div></div>
 
-  <button class="ctrl" onclick="move('left')">⬅️</button>
-  <button class="ctrl" onclick="move('down')">⬇️</button>
-  <button class="ctrl" onclick="move('right')">➡️</button>
+  <button class="ctrl" onclick="move('left')">◀</button>
+  <button class="ctrl" onclick="move('down')">▼</button>
+  <button class="ctrl" onclick="move('right')">▶</button>
 </div>
   
 <div id="scoreBox">
