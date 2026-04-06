@@ -239,7 +239,8 @@ window.register=async()=>{
   try{
     const u=await createUserWithEmailAndPassword(auth,email,pass);
 
-    // 🔥 PASTIKAN DATA KE SAVE
+    console.log("USER UID:", u.user.uid); // debug
+
     await set(ref(db,"users/"+u.user.uid),{
       name: name,
       email: email,
@@ -248,20 +249,13 @@ window.register=async()=>{
 
     msg.innerText="Berhasil daftar!";
     
-    // OPTIONAL langsung ke game
     location.href="main.html";
 
   }catch(e){
+    console.log(e);
     msg.innerText=e.message;
   }
- }
-  
-window.login=async()=>{
-  try{
-    await signInWithEmailAndPassword(auth,loginEmail.value.trim(),loginPass.value.trim());
-    location.href="main.html";
-  }catch(e){msg.innerText=e.message;}
-}
+  }
 
 onAuthStateChanged(auth,u=>{
   if(u) location.href="main.html";
