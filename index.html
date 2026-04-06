@@ -231,17 +231,31 @@ window.register=async()=>{
   const email=regEmail.value.trim();
   const pass=regPass.value.trim();
 
-  if(!name){msg.innerText="Nama wajib!"; return;}
+  if(!name){
+    msg.innerText="Nama wajib!";
+    return;
+  }
 
   try{
     const u=await createUserWithEmailAndPassword(auth,email,pass);
-    await set(ref(db,"users/"+u.user.uid),{
-      name,email,score:0
-    });
-    msg.innerText="Berhasil daftar!";
-  }catch(e){msg.innerText=e.message;}
-}
 
+    // 🔥 PASTIKAN DATA KE SAVE
+    await set(ref(db,"users/"+u.user.uid),{
+      name: name,
+      email: email,
+      score: 0
+    });
+
+    msg.innerText="Berhasil daftar!";
+    
+    // OPTIONAL langsung ke game
+    location.href="main.html";
+
+  }catch(e){
+    msg.innerText=e.message;
+  }
+ }
+  
 window.login=async()=>{
   try{
     await signInWithEmailAndPassword(auth,loginEmail.value.trim(),loginPass.value.trim());
