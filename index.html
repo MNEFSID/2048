@@ -9,86 +9,24 @@
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
-  overflow:hidden;
-
-  background: linear-gradient(135deg,#faf8ef,#e6dccc);
-
+  background:linear-gradient(135deg,#faf8ef,#e6dccc);
   display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
 }
 
-/* 🔥 GLOW (lebih ringan) */
-body::before, body::after{
-  content:"";
-  position:absolute;
-  border-radius:50%;
-  filter:blur(60px);
-  opacity:0.5;
-}
-
-body::before{
-  width:250px;
-  height:250px;
-  background:#edc22e;
-  top:15%;
-  left:10%;
-  animation:float 8s infinite ease-in-out;
-}
-
-body::after{
-  width:200px;
-  height:200px;
-  background:#f59563;
-  bottom:10%;
-  right:10%;
-  animation:float 10s infinite ease-in-out;
-}
-
-@keyframes float{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-20px);}
-}
-
-/* 🎮 TILE BG (dikurangin biar gak lag) */
-.tile-bg{
-  position:absolute;
-  width:50px;
-  height:50px;
-  border-radius:10px;
-  background:#eee4da;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  opacity:0.12;
-  animation:fall linear infinite;
-}
-
-@keyframes fall{
-  from{transform:translateY(-100px);}
-  to{transform:translateY(110vh);}
-}
-
-/* 🧊 CARD */
+/* CARD */
 .card{
-  position:relative;
-  background:rgba(187,173,160,0.85);
-  backdrop-filter: blur(8px);
-  padding:25px;
-  border-radius:18px;
-  width:280px;
+  background:rgba(187,173,160,0.9);
+  padding:30px;
+  border-radius:20px;
+  width:300px;
   text-align:center;
-  box-shadow:0 15px 35px rgba(0,0,0,0.25);
-  animation:fadeIn .5s ease;
-  z-index:10;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
 }
 
-h2{
-  color:white;
-  margin-bottom:15px;
-}
+h2{color:white; margin-bottom:15px}
 
 /* INPUT */
 input{
@@ -97,17 +35,12 @@ input{
   margin:6px 0;
   border:none;
   border-radius:8px;
-  outline:none;
-}
-
-input:focus{
-  box-shadow:0 0 0 2px rgba(255,255,255,0.4);
 }
 
 /* BUTTON */
 button{
   width:100%;
-  padding:11px;
+  padding:12px;
   margin-top:10px;
   border:none;
   border-radius:10px;
@@ -115,8 +48,7 @@ button{
   color:white;
   font-weight:bold;
   cursor:pointer;
-  box-shadow:0 4px 0 #6e5c4a;
-  transition:.1s;
+  box-shadow:0 5px 0 #6e5c4a;
 }
 
 button:active{
@@ -124,48 +56,19 @@ button:active{
   box-shadow:0 2px 0 #6e5c4a;
 }
 
-/* LINK FIX SPACING */
-.link{
-  margin-top:12px;
-  font-size:13px;
-  color:white;
-  line-height:1.5;
-}
+/* LINK */
+.link{color:white;font-size:14px;margin-top:10px}
+.link span{color:#2196f3;cursor:pointer}
 
-.link span{
-  color:#2196f3;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-#msg{
-  margin-top:10px;
-  color:white;
-  font-size:12px;
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform:translateY(15px);}
-  to{opacity:1; transform:translateY(0);}
-}
+#msg{color:white;font-size:13px;margin-top:10px}
 </style>
 </head>
-<body>
 
-<!-- 🎮 BACKGROUND (OPTIMIZED) -->
-<script>
-for(let i=0;i<6;i++){ // dikurangin dari 10 → 6
-  let t=document.createElement("div");
-  t.className="tile-bg";
-  t.innerText=[2,4,8,16][Math.floor(Math.random()*4)];
-  t.style.left=Math.random()*100+"vw";
-  t.style.animationDuration=(8+Math.random()*6)+"s"; // lebih pelan
-  document.body.appendChild(t);
-}
-</script>
+<body>
 
 <div class="card">
 
+<!-- LOGIN -->
 <div id="loginBox">
 <h2>Masuk</h2>
 <input id="loginEmail" type="email" placeholder="Email">
@@ -173,11 +76,11 @@ for(let i=0;i<6;i++){ // dikurangin dari 10 → 6
 <button onclick="login()">Masuk</button>
 
 <div class="link">
-Belum punya akun?<br>
-<span onclick="showRegister()">Daftar</span>
+Belum punya akun? <span onclick="showRegister()">Daftar</span>
 </div>
 </div>
 
+<!-- REGISTER -->
 <div id="registerBox" style="display:none;">
 <h2>Daftar</h2>
 <input id="regName" placeholder="Nama">
@@ -186,8 +89,7 @@ Belum punya akun?<br>
 <button onclick="register()">Daftar</button>
 
 <div class="link">
-Sudah punya akun?<br>
-<span onclick="showLogin()">Masuk</span>
+Sudah punya akun? <span onclick="showLogin()">Masuk</span>
 </div>
 </div>
 
@@ -195,9 +97,10 @@ Sudah punya akun?<br>
 
 </div>
 
+<!-- 🔥 FIREBASE FIX -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, set } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -216,6 +119,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// SWITCH UI
 window.showRegister=()=>{
   loginBox.style.display="none";
   registerBox.style.display="block";
@@ -226,10 +130,11 @@ window.showLogin=()=>{
   loginBox.style.display="block";
 }
 
-window.register=async()=>{
-  const name=regName.value.trim();
-  const email=regEmail.value.trim();
-  const pass=regPass.value.trim();
+// ✅ REGISTER (FIX TOTAL)
+window.register = async ()=>{
+  const name = regName.value.trim();
+  const email = regEmail.value.trim();
+  const pass = regPass.value.trim();
 
   if(!name){
     msg.innerText="Nama wajib!";
@@ -237,10 +142,9 @@ window.register=async()=>{
   }
 
   try{
-    const u=await createUserWithEmailAndPassword(auth,email,pass);
+    const u = await createUserWithEmailAndPassword(auth,email,pass);
 
-    console.log("USER UID:", u.user.uid); // debug
-
+    // 🔥 WAJIB: tunggu sampai data ke-save
     await set(ref(db,"users/"+u.user.uid),{
       name: name,
       email: email,
@@ -249,17 +153,24 @@ window.register=async()=>{
 
     msg.innerText="Berhasil daftar!";
     
-    location.href="main.html";
+    // 🔥 redirect setelah aman
+    location.href = "main.html";
 
   }catch(e){
+    msg.innerText = e.message;
     console.log(e);
+  }
+}
+
+// LOGIN
+window.login = async ()=>{
+  try{
+    await signInWithEmailAndPassword(auth,loginEmail.value.trim(),loginPass.value.trim());
+    location.href="main.html";
+  }catch(e){
     msg.innerText=e.message;
   }
-  }
-
-onAuthStateChanged(auth,u=>{
-  if(u) location.href="main.html";
-});
+}
 </script>
 
 </body>
