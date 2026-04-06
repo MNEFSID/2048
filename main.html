@@ -174,7 +174,7 @@ const size = 4, gameSize = 320, gap = 10;
 const tileSize = (gameSize - gap * (size + 1)) / size;
 
 let grid, tiles = {}, score = 0;
-let best = localStorage.getItem("best2048") || 0;
+let best = 0; // default
 document.getElementById("best").innerText = best;
 
 function pos(r, c) {
@@ -240,15 +240,20 @@ function createTile(r, c, val) {
 function updateScore() {
   document.getElementById("score").innerText = score;
 
+  // update best jika lebih besar
   if (score > best) {
     best = score;
-    localStorage.setItem("best2048", best);
     document.getElementById("best").innerText = best;
+
+    // update Firebase
+    if (currentUser) {
+      update(ref(db, "users/" + currentUser.uid), { score: best });
+    }
   }
 
-  // 🔥 CONNECT KE FIREBASE (TAMBAHAN DOANG)
+  // juga untuk leaderboard
   if (window.saveScoreOnline) window.saveScoreOnline(score);
-}
+  }
 
 function move(dir) {
   let moved = false;
@@ -396,6 +401,14 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentUser = user;
+
+  // Ambil score akun dari Firebase
+  const snap = await get(ref(db, "users/" + currentUser.uid));
+  if (snap.exists()) {
+    best = snap.val().score || 0;
+    document.getElementById("best").innerText = best;
+  }
+
   loadLeaderboard();
 });
 
