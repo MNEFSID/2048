@@ -3,51 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login 2048</title>
+<title>Masuk 2048</title>
 
 <style>
 body{
-  font-family: Arial;
-  background:#121212;
-  color:white;
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:#faf8ef;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#bbada0;
+  padding:30px;
+  border-radius:15px;
+  width:300px;
   text-align:center;
-  padding-top:100px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2{
+  margin-bottom:20px;
+  color:white;
 }
 
 input{
+  width:100%;
   padding:10px;
-  margin:5px;
-  width:250px;
+  margin:6px 0;
   border:none;
-  border-radius:5px;
+  border-radius:8px;
+  outline:none;
 }
 
 button{
-  padding:10px 20px;
-  margin:5px;
+  width:100%;
+  padding:10px;
+  margin-top:10px;
   border:none;
-  border-radius:5px;
-  background:#00c853;
+  border-radius:8px;
+  background:#8f7a66;
   color:white;
+  font-weight:bold;
   cursor:pointer;
 }
 
 button:hover{
-  background:#00a844;
+  background:#7a6855;
+}
+
+.link{
+  margin-top:10px;
+  font-size:14px;
+  color:white;
+}
+
+.link span{
+  color:#2196f3;
+  cursor:pointer;
+}
+
+#msg{
+  margin-top:10px;
+  color:#fff;
+  font-size:13px;
 }
 </style>
 </head>
 <body>
 
-<h2>Login / Register 2048</h2>
+<div class="card">
 
-<input id="email" placeholder="Email"><br>
-<input id="pass" type="password" placeholder="Password"><br>
+  <!-- LOGIN -->
+  <div id="loginBox">
+    <h2>Masuk</h2>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPass" type="password" placeholder="Password">
 
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
+    <button onclick="login()">Masuk</button>
 
-<p id="msg"></p>
+    <div class="link">
+      Belum punya akun? <span onclick="showRegister()">Daftar</span>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerBox" style="display:none;">
+    <h2>Daftar</h2>
+    <input id="regName" placeholder="Nama">
+    <input id="regEmail" placeholder="Email">
+    <input id="regPass" type="password" placeholder="Password">
+
+    <button onclick="register()">Daftar</button>
+
+    <div class="link">
+      Sudah punya akun? <span onclick="showLogin()">Masuk</span>
+    </div>
+  </div>
+
+  <p id="msg"></p>
+
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -56,7 +115,6 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, set } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// CONFIG LU
 const firebaseConfig = {
   apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
   authDomain: "project-4785033342589185071.firebaseapp.com",
@@ -64,55 +122,69 @@ const firebaseConfig = {
   projectId: "project-4785033342589185071",
   storageBucket: "project-4785033342589185071.firebasestorage.app",
   messagingSenderId: "933405535534",
-  appId: "1:933405535534:web:2979b14d5a070205e31ebf",
-  measurementId: "G-JM5PB1VPKH"
+  appId: "1:933405535534:web:2979b14d5a070205e31ebf"
 };
 
-// INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// REGISTER
-window.register = function(){
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
+// SWITCH UI
+window.showRegister = () => {
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("registerBox").style.display="block";
+}
 
-  createUserWithEmailAndPassword(auth, email, pass)
-  .then(async (userCred) => {
+window.showLogin = () => {
+  document.getElementById("loginBox").style.display="block";
+  document.getElementById("registerBox").style.display="none";
+}
+
+// REGISTER
+window.register = async function(){
+  const name = document.getElementById("regName").value;
+  const email = document.getElementById("regEmail").value;
+  const pass = document.getElementById("regPass").value;
+
+  if(!name){
+    document.getElementById("msg").innerText = "Nama wajib diisi!";
+    return;
+  }
+
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
 
-    // 🔥 WAJIB: simpan ke database
+    // 🔥 simpan nama buat leaderboard
     await set(ref(db, "users/" + user.uid), {
+      name: name,
       email: email,
       score: 0
     });
 
-    document.getElementById("msg").innerText = "Register sukses!";
-  })
-  .catch(err => {
+    document.getElementById("msg").innerText = "Register berhasil!";
+  }catch(err){
     document.getElementById("msg").innerText = err.message;
-  });
   }
+}
 
 // LOGIN
-window.login = function(){
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("pass").value;
+window.login = async function(){
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
 
-  signInWithEmailAndPassword(auth, email, pass)
-  .then(() => {
-    window.location.href = "main.html";
-  })
-  .catch(err => {
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+    location.href = "main.html";
+  }catch(err){
     document.getElementById("msg").innerText = err.message;
-  });
+  }
 }
 
 // AUTO LOGIN
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, user=>{
   if(user){
-    window.location.href = "main.html";
+    location.href = "main.html";
   }
 });
 </script>
