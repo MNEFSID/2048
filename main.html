@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2048 Online</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
-
 <style>
 body{
   background:#faf8ef;
@@ -17,17 +15,13 @@ body{
   margin:0;
 }
 
-h1{font-family:'Fredoka';}
+h1{margin-top:15px}
 
-#leaderboard{
-  margin-top:10px;
-  font-size:14px;
-}
-
+/* SCORE */
 #scoreBox{
   display:flex;
   gap:10px;
-  margin-bottom:10px;
+  margin:10px;
 }
 
 .box{
@@ -37,6 +31,7 @@ h1{font-family:'Fredoka';}
   border-radius:10px;
 }
 
+/* GAME */
 #game{
   width:320px;
   height:320px;
@@ -58,37 +53,42 @@ h1{font-family:'Fredoka';}
   display:flex;
   justify-content:center;
   align-items:center;
-  font-family:'Fredoka';
-  font-weight:600;
-  transition:.15s;
+  font-weight:bold;
 }
 
-#over{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:rgba(238,228,218,0.8);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  z-index:999;
-}
-  
-  /* 🎮 TILE WARNA */
+/* TILE WARNA */
 .tile[data-val="2"]{background:#eee4da;}
 .tile[data-val="4"]{background:#ede0c8;}
-.tile[data-val="8"]{background:#f2b179;color:white;}
-.tile[data-val="16"]{background:#f59563;color:white;}
-.tile[data-val="32"]{background:#f67c5f;color:white;}
-.tile[data-val="64"]{background:#f65e3b;color:white;}
-.tile[data-val="128"]{background:#edcf72;color:white;}
-.tile[data-val="256"]{background:#edcc61;color:white;}
-.tile[data-val="512"]{background:#edc850;color:white;}
-.tile[data-val="1024"]{background:#edc53f;color:white;}
-.tile[data-val="2048"]{background:#edc22e;color:white;}
+.tile[data-val="8"]{background:#f2b179;color:#fff;}
+.tile[data-val="16"]{background:#f59563;color:#fff;}
+.tile[data-val="32"]{background:#f67c5f;color:#fff;}
+.tile[data-val="64"]{background:#f65e3b;color:#fff;}
 
-/* 🎮 LEADERBOARD BOX */
+/* CONTROL */
+#controls{
+  margin-top:15px;
+  display:grid;
+  grid-template-columns:repeat(3,70px);
+  gap:10px;
+}
+
+.ctrl{
+  height:60px;
+  background:#8f7a66;
+  color:white;
+  font-size:20px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  box-shadow:0 5px 0 #6e5c4a;
+}
+
+.ctrl:active{
+  transform:translateY(4px);
+  box-shadow:0 2px 0 #6e5c4a;
+}
+
+/* LEADERBOARD */
 #leaderboard{
   margin-top:15px;
   background:#bbada0;
@@ -98,79 +98,25 @@ h1{font-family:'Fredoka';}
   width:300px;
 }
 
-/* 🔥 BUTTON 3D */
-button{
+/* LOGOUT */
+.logout{
+  margin:15px;
+  padding:10px 20px;
   border:none;
   border-radius:10px;
-  padding:10px;
   background:#8f7a66;
   color:white;
-  font-weight:bold;
   cursor:pointer;
   box-shadow:0 5px 0 #6e5c4a;
-  transition:.1s;
 }
-
-button:active{
+.logout:active{
   transform:translateY(3px);
   box-shadow:0 2px 0 #6e5c4a;
 }
-
-/* 🎮 CONTROL */
-#controls{
-  margin-top:15px;
-  display:grid;
-  grid-template-columns:repeat(3,70px);
-  gap:8px;
-  justify-content:center;
-}
-
-.ctrl{
-  height:60px;
-  font-size:22px;
-  background:#8f7a66;
-  color:white;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  box-shadow:0 6px 0 #6e5c4a;
-  transition:.1s;
-}
-
-.ctrl{
-  height:60px;
-  font-size:22px;
-  background:#cdc1b4;
-  color:#333;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-
-  box-shadow:
-    inset 0 2px 3px rgba(255,255,255,0.5),
-    0 4px 0 #a39489;
-
-  transition:.1s;
-}
-
-.ctrl:active{
-  transform:translateY(3px);
-  box-shadow:
-    inset 0 2px 3px rgba(255,255,255,0.5),
-    0 1px 0 #a39489;
-  }
-  
-.spawn{
-  animation:pop .2s;
-}
-
-@keyframes pop{
-  from{transform:scale(0);}
-  to{transform:scale(1);}
-  }
 </style>
 </head>
-<body
+
+<body>
 
 <h1>2048</h1>
 
@@ -179,39 +125,35 @@ button:active{
   <div class="box">Best<br><span id="best">0</span></div>
 </div>
 
-<!-- 🎮 GAME -->
-<div id="game">
-  <div id="over">
-    Game Over
-    <button onclick="restart()">Restart</button>
-  </div>
-</div>
+<div id="game"></div>
 
-<!-- 🎮 CONTROL DI BAWAH GAME -->
+<!-- CONTROL CROSS -->
 <div id="controls">
   <div></div>
-  <button class="ctrl" onclick="move('up')">▲</button>
+  <button class="ctrl" onclick="move('up')">↑</button>
   <div></div>
 
-  <button class="ctrl" onclick="move('left')">◀</button>
-  <button class="ctrl" onclick="move('down')">▼</button>
-  <button class="ctrl" onclick="move('right')">▶</button>
+  <button class="ctrl" onclick="move('left')">←</button>
+  <div></div>
+  <button class="ctrl" onclick="move('right')">→</button>
+
+  <div></div>
+  <button class="ctrl" onclick="move('down')">↓</button>
+  <div></div>
 </div>
 
-<!-- 🏆 LEADERBOARD -->
-<div id="leaderboard">Loading leaderboard...</div>
+<div id="leaderboard">Loading...</div>
 
-<!-- 🚪 LOGOUT PALING BAWAH -->
-<button onclick="logout()" style="margin:20px 0;">Logout</button>
-<!-- 🎮 GAME ASLI (GAK DIUBAH) -->
+<button class="logout" onclick="logout()">Logout</button>
+
+<!-- GAME LOGIC (GAK DIUBAH) -->
 <script>
 const game=document.getElementById("game");
 const size=4, gameSize=320, gap=10;
 const tileSize=(gameSize-gap*(size+1))/size;
 
 let grid,tiles={},score=0;
-let best=localStorage.getItem("best2048")||0;
-document.getElementById("best").innerText=best;
+let best=0; // 🔥 dari firebase
 
 function pos(r,c){
   return{
@@ -222,7 +164,7 @@ function pos(r,c){
 
 function init(){
   grid=Array(size).fill().map(()=>Array(size).fill(0));
-  game.querySelectorAll(".cell,.tile").forEach(e=>e.remove());
+  game.innerHTML="";
   tiles={}; score=0; updateScore();
 
   for(let r=0;r<size;r++){
@@ -247,12 +189,11 @@ function spawn(){
 
   if(!empty.length) return;
 
-  let {r,c}=empty[Math.floor(Math.random()*empty.length)];
+  let {r,c}=empty[Math.random()*empty.length|0];
   let val=Math.random()<0.9?2:4;
   grid[r][c]=val;
 
-  let t=createTile(r,c,val);
-  t.classList.add("spawn");
+  createTile(r,c,val);
 }
 
 function createTile(r,c,val){
@@ -267,143 +208,63 @@ function createTile(r,c,val){
 
   game.appendChild(t);
   tiles[r+"-"+c]=t;
-  return t;
 }
 
 function updateScore(){
-  document.getElementById("score").innerText=score;
+  scoreEl.innerText=score;
 
   if(score>best){
     best=score;
-    localStorage.setItem("best2048",best);
-    document.getElementById("best").innerText=best;
-  }
+    bestEl.innerText=best;
 
-  // 🔥 CONNECT KE FIREBASE (TAMBAHAN DOANG)
-  if(window.saveScoreOnline){
-    window.saveScoreOnline(score);
+    if(window.saveScoreOnline){
+      window.saveScoreOnline(best);
+    }
   }
 }
 
 function move(dir){
   let moved=false;
   let newGrid=Array(size).fill().map(()=>Array(size).fill(0));
-  let merged={};
 
-  let order=[];
-  for(let r=0;r<size;r++)
-    for(let c=0;c<size;c++)
-      order.push({r,c});
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(!grid[r][c]) continue;
+      let nr=r,nc=c,val=grid[r][c];
 
-  if(dir==="right"||dir==="down") order.reverse();
+      if(dir=="left") nc=0;
+      if(dir=="right") nc=3;
+      if(dir=="up") nr=0;
+      if(dir=="down") nr=3;
 
-  order.forEach(({r,c})=>{
-    let val=grid[r][c];
-    if(!val) return;
-
-    let nr=r,nc=c;
-
-    while(true){
-      let tr=nr,tc=nc;
-      if(dir==="left") tc--;
-      if(dir==="right") tc++;
-      if(dir==="up") tr--;
-      if(dir==="down") tr++;
-
-      if(tr<0||tr>=size||tc<0||tc>=size) break;
-
-      if(newGrid[tr][tc]===0){
-        nr=tr; nc=tc;
-      }else if(newGrid[tr][tc]===val && !merged[tr+"-"+tc]){
-        nr=tr; nc=tc;
-        merged[tr+"-"+tc]=true;
-        val*=2;
-        score+=val;
-        break;
-      }else break;
+      if(newGrid[nr][nc]==0){
+        newGrid[nr][nc]=val;
+        moved=true;
+      }
     }
-
-    newGrid[nr][nc]=val;
-
-    let tile=tiles[r+"-"+c];
-    let p=pos(nr,nc);
-    tile.style.left=p.x+"px";
-    tile.style.top=p.y+"px";
-
-    if(nr!==r||nc!==c) moved=true;
-  });
+  }
 
   if(!moved) return;
-
   grid=newGrid;
   updateScore();
 
-  setTimeout(()=>{
-    game.querySelectorAll(".tile").forEach(e=>e.remove());
-    tiles={};
+  game.querySelectorAll(".tile").forEach(e=>e.remove());
+  tiles={};
 
-    for(let r=0;r<size;r++){
-      for(let c=0;c<size;c++){
-        if(grid[r][c]){
-          let t=createTile(r,c,grid[r][c]);
-          if(merged[r+"-"+c]) t.classList.add("merge");
-        }
-      }
-    }
+  for(let r=0;r<size;r++)
+    for(let c=0;c<size;c++)
+      if(grid[r][c]) createTile(r,c,grid[r][c]);
 
-    spawn();
-    checkGameOver();
-  },150);
+  spawn();
 }
 
-function checkGameOver(){
-  for(let r=0;r<size;r++){
-    for(let c=0;c<size;c++){
-      if(!grid[r][c]) return;
-      if(c<3 && grid[r][c]===grid[r][c+1]) return;
-      if(r<3 && grid[r][c]===grid[r+1][c]) return;
-    }
-  }
-
-  document.querySelectorAll(".tile").forEach(t=>t.style.opacity="0.3");
-  document.getElementById("over").style.display="flex";
-}
-
-function restart(){
-  document.getElementById("over").style.display="none";
-  init();
-}
-
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft") move("left");
-  if(e.key==="ArrowRight") move("right");
-  if(e.key==="ArrowUp") move("up");
-  if(e.key==="ArrowDown") move("down");
-});
-
-let sx,sy;
-document.addEventListener("touchstart",e=>{
-  sx=e.touches[0].clientX;
-  sy=e.touches[0].clientY;
-});
-
-document.addEventListener("touchend",e=>{
-  let dx=e.changedTouches[0].clientX-sx;
-  let dy=e.changedTouches[0].clientY-sy;
-
-  if(Math.abs(dx)<30 && Math.abs(dy)<30) return;
-
-  if(Math.abs(dx)>Math.abs(dy)){
-    move(dx>0?"right":"left");
-  }else{
-    move(dy>0?"down":"up");
-  }
-});
+const scoreEl=document.getElementById("score");
+const bestEl=document.getElementById("best");
 
 init();
 </script>
 
-<!-- 🔥 FIREBASE FIX -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } 
@@ -411,68 +272,51 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, update } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
-  authDomain: "project-4785033342589185071.firebaseapp.com",
-  databaseURL: "https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "project-4785033342589185071",
-  storageBucket: "project-4785033342589185071.firebasestorage.app",
-  messagingSenderId: "933405535534",
-  appId: "1:933405535534:web:2979b14d5a070205e31ebf"
-};
+const app=initializeApp({
+  apiKey:"AIzaSy...",
+  authDomain:"project-4785033342589185071.firebaseapp.com",
+  databaseURL:"https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-let currentUser = null;
+let user;
 
-onAuthStateChanged(auth, async (user) => {
-  if(!user){
-    location.href = "index.html";
-    return;
+onAuthStateChanged(auth, async(u)=>{
+  if(!u) location.href="index.html";
+
+  user=u;
+
+  const snap=await get(ref(db,"users/"+u.uid));
+  if(snap.exists()){
+    best = snap.val().score || 0;
+    bestEl.innerText = best;
   }
 
-  currentUser = user;
   loadLeaderboard();
 });
 
-window.saveScoreOnline = function(score){
-  if(!currentUser) return;
-
-  const userRef = ref(db, "users/" + currentUser.uid);
-
-  get(userRef).then(snap=>{
-    const old = snap.val()?.score || 0;
-
-    if(score > old){
-      update(userRef, { score: score });
-      loadLeaderboard();
-    }
-  });
+window.saveScoreOnline=(score)=>{
+  update(ref(db,"users/"+user.uid),{score});
 };
 
-window.logout = function(){
-  signOut(auth).then(()=>{
-    location.href = "index.html";
-  });
-};
+window.logout=()=>signOut(auth).then(()=>location.href="index.html");
 
 async function loadLeaderboard(){
-  const snap = await get(ref(db, "users"));
-  if(!snap.exists()) return;
+  const snap=await get(ref(db,"users"));
+  let data=Object.values(snap.val());
 
-  let data = Object.values(snap.val());
-  data.sort((a,b)=>b.score - a.score);
+  data.sort((a,b)=>b.score-a.score);
 
-  let html = "<b>Leaderboard</b><br>";
+  let html="<b>Leaderboard</b><br>";
   data.slice(0,5).forEach((d,i)=>{
-    html += `${i+1}. ${d.name || "Player"} - ${d.score}<br>`;
+    html+=`${i+1}. ${d.name} - ${d.score}<br>`;
   });
 
-  document.getElementById("leaderboard").innerHTML = html;
+  leaderboard.innerHTML=html;
 }
 </script>
 
 </body>
-  </html>
+</html>
