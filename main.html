@@ -1,151 +1,838 @@
-<!DOCTYPE html>  <html lang="id">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<title>Masuk</title>  <style>  
-body{  
-  margin:0;  
-  font-family:'Poppins',sans-serif;  
-  background:linear-gradient(135deg,#faf8ef,#e6dccc);  
-  display:flex;  
-  justify-content:center;  
-  align-items:center;  
-  height:100vh;  
-}  
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2048 Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{
   
-/* CARD */  
-.card{  
-  background:rgba(187,173,160,0.9);  
-  padding:30px;  
-  border-radius:20px;  
-  width:300px;  
-  text-align:center;  
-  box-shadow:0 20px 40px rgba(0,0,0,0.3);  
-}  
+  background:#faf8ef;
   
-h2{color:white; margin-bottom:15px}  
+  font-family:'Poppins';
   
-/* INPUT */  
-input{  
-  width:100%;  
-  padding:10px;  
-  margin:6px 0;  
-  border:none;  
-  border-radius:8px;  
-}  
+  display:flex;
   
-/* BUTTON */  
-button{  
-  width:100%;  
-  padding:12px;  
-  margin-top:10px;  
-  border:none;  
-  border-radius:10px;  
-  background:#8f7a66;  
-  color:white;  
-  font-weight:bold;  
-  cursor:pointer;  
-  box-shadow:0 5px 0 #6e5c4a;  
-}  
+  flex-direction:column;
   
-button:active{  
-  transform:translateY(3px);  
-  box-shadow:0 2px 0 #6e5c4a;  
-}  
+  align-items:center;
   
-/* LINK */  
-.link{color:white;font-size:14px;margin-top:10px}  
-.link span{color:#2196f3;cursor:pointer}  
+  margin:0;
   
-#msg{color:white;font-size:13px;margin-top:10px}  
-</style>  </head>  <body>  <div class="card">  <!-- LOGIN -->  <div id="loginBox">  
-<h2>Masuk</h2>  
-<input id="loginEmail" type="email" placeholder="Email">  
-<input id="loginPass" type="password" placeholder="Password">  
-<button onclick="login()">Masuk</button>  <div class="link">  
-Belum punya akun? <span onclick="showRegister()">Daftar</span>  
-</div>  
-</div>  <!-- REGISTER -->  <div id="registerBox" style="display:none;">  
-<h2>Daftar</h2>  
-<input id="regName" placeholder="Nama">  
-<input id="regEmail" type="email" placeholder="Email">  
-<input id="regPass" type="password" placeholder="Password">  
-<button onclick="register()">Daftar</button>  <div class="link">  
-Sudah punya akun? <span onclick="showLogin()">Masuk</span>  
-</div>  
-</div>  <p id="msg"></p>  </div>  <!-- 🔥 FIREBASE FIX -->  <script type="module">  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }   
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
-import { getDatabase, ref, set }   
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";  
+}
   
-const firebaseConfig = {  
-  apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",  
-  authDomain: "project-4785033342589185071.firebaseapp.com",  
-  databaseURL: "https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app",  
-  projectId: "project-4785033342589185071",  
-  storageBucket: "project-4785033342589185071.firebasestorage.app",  
-  messagingSenderId: "933405535534",  
-  appId: "1:933405535534:web:2979b14d5a070205e31ebf"  
-};  
+
   
-const app = initializeApp(firebaseConfig);  
-const auth = getAuth(app);  
-const db = getDatabase(app);  
+h1{font-family:'Fredoka';}
   
-// SWITCH UI  
-window.showRegister=()=>{  
-  loginBox.style.display="none";  
-  registerBox.style.display="block";  
-}  
+
   
-window.showLogin=()=>{  
-  registerBox.style.display="none";  
-  loginBox.style.display="block";  
-}  
+#leaderboard{
   
-// ✅ REGISTER (FIX TOTAL)  
-window.register = async ()=>{  
-  const name = regName.value.trim();  
-  const email = regEmail.value.trim();  
-  const pass = regPass.value.trim();  
+  margin-top:10px;
   
-  if(!name){  
-    msg.innerText="Nama wajib!";  
-    return;  
-  }  
+  font-size:14px;
   
-  try{  
-    const u = await createUserWithEmailAndPassword(auth,email,pass);  
+}
   
-    // 🔥 WAJIB: tunggu sampai data ke-save  
-    await set(ref(db,"users/"+u.user.uid),{  
-      name: name,  
-      email: email,  
-      score: 0  
-    });  
+
   
-    msg.innerText="Berhasil daftar!";  
-      
-    // 🔥 redirect setelah aman  
-    location.href = "main.html";  
+#scoreBox{
   
-  }catch(e){  
-    msg.innerText = e.message;  
-    console.log(e);  
-  }  
-}  
+  display:flex;
   
-// LOGIN  
-window.login = async ()=>{  
-  try{  
-    await signInWithEmailAndPassword(auth,loginEmail.value.trim(),loginPass.value.trim());  
-    location.href="main.html";  
-  }catch(e){  
-    msg.innerText=e.message;  
-  }  
-}  
-</script>  
-</body>  
+  gap:10px;
+  
+  margin-bottom:10px;
+  
+}
+  
+
+  
+.box{
+  
+  background:#bbada0;
+  
+  color:white;
+  
+  padding:10px 15px;
+  
+  border-radius:10px;
+  
+}
+  
+
+  
+#game{
+  
+  width:320px;
+  
+  height:320px;
+  
+  background:#bbada0;
+  
+  position:relative;
+  
+  border-radius:10px;
+  
+}
+  
+
+  
+.cell,.tile{
+  
+  position:absolute;
+  
+  width:calc((320px - 50px)/4);
+  
+  height:calc((320px - 50px)/4);
+  
+  border-radius:10px;
+  
+}
+  
+
+  
+.cell{background:#cdc1b4;}
+  
+
+  
+.tile{
+  
+  display:flex;
+  
+  justify-content:center;
+  
+  align-items:center;
+  
+  font-family:'Fredoka';
+  
+  font-weight:600;
+  
+  transition:.15s;
+  
+}
+  
+
+  
+#over{
+  
+  position:absolute;
+  
+  width:100%;
+  
+  height:100%;
+  
+  background:rgba(238,228,218,0.8);
+  
+  display:none;
+  
+  justify-content:center;
+  
+  align-items:center;
+  
+  flex-direction:column;
+  
+  z-index:999;
+  
+}
+  
+  
+  
+  /* 🎮 TILE WARNA */
+  
+.tile[data-val="2"]{background:#eee4da;}
+  
+.tile[data-val="4"]{background:#ede0c8;}
+  
+.tile[data-val="8"]{background:#f2b179;color:white;}
+  
+.tile[data-val="16"]{background:#f59563;color:white;}
+  
+.tile[data-val="32"]{background:#f67c5f;color:white;}
+  
+.tile[data-val="64"]{background:#f65e3b;color:white;}
+  
+.tile[data-val="128"]{background:#edcf72;color:white;}
+  
+.tile[data-val="256"]{background:#edcc61;color:white;}
+  
+.tile[data-val="512"]{background:#edc850;color:white;}
+  
+.tile[data-val="1024"]{background:#edc53f;color:white;}
+  
+.tile[data-val="2048"]{background:#edc22e;color:white;}
+  
+
+  
+/* 🎮 LEADERBOARD BOX */
+  
+#leaderboard{
+  
+  margin-top:15px;
+  
+  background:#bbada0;
+  
+  padding:10px;
+  
+  border-radius:10px;
+  
+  color:white;
+  
+  width:300px;
+  
+}
+  
+
+  
+/* 🔥 BUTTON 3D */
+  
+button{
+  
+  border:none;
+  
+  border-radius:10px;
+  
+  padding:10px;
+  
+  background:#8f7a66;
+  
+  color:white;
+  
+  font-weight:bold;
+  
+  cursor:pointer;
+  
+  box-shadow:0 5px 0 #6e5c4a;
+  
+  transition:.1s;
+  
+}
+  
+
+  
+button:active{
+  
+  transform:translateY(3px);
+  
+  box-shadow:0 2px 0 #6e5c4a;
+  
+}
+  
+
+  
+/* 🎮 CONTROL */
+  
+#controls{
+  
+  margin-top:15px;
+  
+  display:grid;
+  
+  grid-template-columns:repeat(3,70px);
+  
+  gap:8px;
+  
+  justify-content:center;
+  
+}
+  
+
+  
+.ctrl{
+  
+  height:60px;
+  
+  font-size:22px;
+  
+  background:#8f7a66;
+  
+  color:white;
+  
+  border:none;
+  
+  border-radius:12px;
+  
+  cursor:pointer;
+  
+  box-shadow:0 6px 0 #6e5c4a;
+  
+  transition:.1s;
+  
+}
+  
+
+  
+.ctrl:active{
+  
+  transform:translateY(4px);
+  
+  box-shadow:0 2px 0 #6e5c4a;
+  
+}
+  
+  
+  
+.spawn{
+  
+  animation:pop .2s;
+  
+}
+  
+
+  
+@keyframes pop{
+  
+  from{transform:scale(0);}
+  
+  to{transform:scale(1);}
+  
+  }
+  
+</style></head><body><br><h1>2048</h1><button onclick="logout()">Logout</button>
+
+<div id="controls">  <div></div><button class="ctrl" onclick="move('up')">▲</button>
+
+  <div></div><button class="ctrl" onclick="move('left')">◀</button>
+
+<button class="ctrl" onclick="move('down')">▼</button>
+
+<button class="ctrl" onclick="move('right')">▶</button>
+
+</div><div id="scoreBox">  <div class="box">Score<br><span id="score">0</span></div>  <div class="box">Best<br><span id="best">0</span></div></div><div id="game">  <div id="over">Game Over
+
+<button onclick="restart()">Restart</button>
+
+  </div></div><div id="leaderboard">Loading leaderboard...</div><!-- 🎮 GAME ASLI (GAK DIUBAH) --><script>
+  
+const game=document.getElementById("game");
+  
+const size=4, gameSize=320, gap=10;
+  
+const tileSize=(gameSize-gap*(size+1))/size;
+  
+
+  
+let grid,tiles={},score=0;
+  
+let best=localStorage.getItem("best2048")||0;
+  
+document.getElementById("best").innerText=best;
+  
+
+  
+function pos(r,c){
+  
+  return{
+  
+    x:gap+c*(tileSize+gap),
+  
+    y:gap+r*(tileSize+gap)
+  
+  };
+  
+}
+  
+
+  
+function init(){
+  
+  grid=Array(size).fill().map(()=>Array(size).fill(0));
+  
+  game.querySelectorAll(".cell,.tile").forEach(e=>e.remove());
+  
+  tiles={}; score=0; updateScore();
+  
+
+  
+  for(let r=0;r<size;r++){
+  
+    for(let c=0;c<size;c++){
+  
+      let d=document.createElement("div");
+  
+      d.className="cell";
+  
+      let p=pos(r,c);
+  
+      d.style.left=p.x+"px";
+  
+      d.style.top=p.y+"px";
+  
+      game.appendChild(d);
+  
+    }
+  
+  }
+  
+
+  
+  spawn(); spawn();
+  
+}
+  
+
+  
+function spawn(){
+  
+  let empty=[];
+  
+  for(let r=0;r<size;r++)
+  
+    for(let c=0;c<size;c++)
+  
+      if(!grid[r][c]) empty.push({r,c});
+  
+
+  
+  if(!empty.length) return;
+  
+
+  
+  let {r,c}=empty[Math.floor(Math.random()*empty.length)];
+  
+  let val=Math.random()<0.9?2:4;
+  
+  grid[r][c]=val;
+  
+
+  
+  let t=createTile(r,c,val);
+  
+  t.classList.add("spawn");
+  
+}
+  
+
+  
+function createTile(r,c,val){
+  
+  let t=document.createElement("div");
+  
+  t.className="tile";
+  
+  t.innerText=val;
+  
+  t.dataset.val=val;
+  
+
+  
+  let p=pos(r,c);
+  
+  t.style.left=p.x+"px";
+  
+  t.style.top=p.y+"px";
+  
+
+  
+  game.appendChild(t);
+  
+  tiles[r+"-"+c]=t;
+  
+  return t;
+  
+}
+  
+
+  
+function updateScore(){
+  
+  document.getElementById("score").innerText=score;
+  
+
+  
+  if(score>best){
+  
+    best=score;
+  
+    localStorage.setItem("best2048",best);
+  
+    document.getElementById("best").innerText=best;
+  
+  }
+  
+
+  
+  // 🔥 CONNECT KE FIREBASE (TAMBAHAN DOANG)
+  
+  if(window.saveScoreOnline){
+  
+    window.saveScoreOnline(score);
+  
+  }
+  
+}
+  
+
+  
+function move(dir){
+  
+  let moved=false;
+  
+  let newGrid=Array(size).fill().map(()=>Array(size).fill(0));
+  
+  let merged={};
+  
+
+  
+  let order=[];
+  
+  for(let r=0;r<size;r++)
+  
+    for(let c=0;c<size;c++)
+  
+      order.push({r,c});
+  
+
+  
+  if(dir==="right"||dir==="down") order.reverse();
+  
+
+  
+  order.forEach(({r,c})=>{
+  
+    let val=grid[r][c];
+  
+    if(!val) return;
+  
+
+  
+    let nr=r,nc=c;
+  
+
+  
+    while(true){
+  
+      let tr=nr,tc=nc;
+  
+      if(dir==="left") tc--;
+  
+      if(dir==="right") tc++;
+  
+      if(dir==="up") tr--;
+  
+      if(dir==="down") tr++;
+  
+
+  
+      if(tr<0||tr>=size||tc<0||tc>=size) break;
+  
+
+  
+      if(newGrid[tr][tc]===0){
+  
+        nr=tr; nc=tc;
+  
+      }else if(newGrid[tr][tc]===val && !merged[tr+"-"+tc]){
+  
+        nr=tr; nc=tc;
+  
+        merged[tr+"-"+tc]=true;
+  
+        val*=2;
+  
+        score+=val;
+  
+        break;
+  
+      }else break;
+  
+    }
+  
+
+  
+    newGrid[nr][nc]=val;
+  
+
+  
+    let tile=tiles[r+"-"+c];
+  
+    let p=pos(nr,nc);
+  
+    tile.style.left=p.x+"px";
+  
+    tile.style.top=p.y+"px";
+  
+
+  
+    if(nr!==r||nc!==c) moved=true;
+  
+  });
+  
+
+  
+  if(!moved) return;
+  
+
+  
+  grid=newGrid;
+  
+  updateScore();
+  
+
+  
+  setTimeout(()=>{
+  
+    game.querySelectorAll(".tile").forEach(e=>e.remove());
+  
+    tiles={};
+  
+
+  
+    for(let r=0;r<size;r++){
+  
+      for(let c=0;c<size;c++){
+  
+        if(grid[r][c]){
+  
+          let t=createTile(r,c,grid[r][c]);
+  
+          if(merged[r+"-"+c]) t.classList.add("merge");
+  
+        }
+  
+      }
+  
+    }
+  
+
+  
+    spawn();
+  
+    checkGameOver();
+  
+  },150);
+  
+}
+  
+
+  
+function checkGameOver(){
+  
+  for(let r=0;r<size;r++){
+  
+    for(let c=0;c<size;c++){
+  
+      if(!grid[r][c]) return;
+  
+      if(c<3 && grid[r][c]===grid[r][c+1]) return;
+  
+      if(r<3 && grid[r][c]===grid[r+1][c]) return;
+  
+    }
+  
+  }
+  
+
+  
+  document.querySelectorAll(".tile").forEach(t=>t.style.opacity="0.3");
+  
+  document.getElementById("over").style.display="flex";
+  
+}
+  
+
+  
+function restart(){
+  
+  document.getElementById("over").style.display="none";
+  
+  init();
+  
+}
+  
+
+  
+document.addEventListener("keydown",e=>{
+  
+  if(e.key==="ArrowLeft") move("left");
+  
+  if(e.key==="ArrowRight") move("right");
+  
+  if(e.key==="ArrowUp") move("up");
+  
+  if(e.key==="ArrowDown") move("down");
+  
+});
+  
+
+  
+let sx,sy;
+  
+document.addEventListener("touchstart",e=>{
+  
+  sx=e.touches[0].clientX;
+  
+  sy=e.touches[0].clientY;
+  
+});
+  
+
+  
+document.addEventListener("touchend",e=>{
+  
+  let dx=e.changedTouches[0].clientX-sx;
+  
+  let dy=e.changedTouches[0].clientY-sy;
+  
+
+  
+  if(Math.abs(dx)<30 && Math.abs(dy)<30) return;
+  
+
+  
+  if(Math.abs(dx)>Math.abs(dy)){
+  
+    move(dx>0?"right":"left");
+  
+  }else{
+  
+    move(dy>0?"down":"up");
+  
+  }
+  
+});
+  
+
+  
+init();
+  
+</script><!-- 🔥 FIREBASE FIX --><script type="module">
+  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  
+import { getAuth, onAuthStateChanged, signOut } 
+  
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  
+import { getDatabase, ref, get, update } 
+  
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  
+
+  
+const firebaseConfig = {
+  
+  apiKey: "AIzaSyAbyU7IggUIsMrKvxhU-mTtv-VsEOoB5iw",
+  
+  authDomain: "project-4785033342589185071.firebaseapp.com",
+  
+  databaseURL: "https://project-4785033342589185071-default-rtdb.asia-southeast1.firebasedatabase.app",
+  
+  projectId: "project-4785033342589185071",
+  
+  storageBucket: "project-4785033342589185071.firebasestorage.app",
+  
+  messagingSenderId: "933405535534",
+  
+  appId: "1:933405535534:web:2979b14d5a070205e31ebf"
+  
+};
+  
+
+  
+const app = initializeApp(firebaseConfig);
+  
+const auth = getAuth(app);
+  
+const db = getDatabase(app);
+  
+
+  
+let currentUser = null;
+  
+
+  
+onAuthStateChanged(auth, async (user) => {
+  
+  if(!user){
+  
+    location.href = "index.html";
+  
+    return;
+  
+  }
+  
+
+  
+  currentUser = user;
+  
+  loadLeaderboard();
+  
+});
+  
+
+  
+window.saveScoreOnline = function(score){
+  
+  if(!currentUser) return;
+  
+
+  
+  const userRef = ref(db, "users/" + currentUser.uid);
+  
+
+  
+  get(userRef).then(snap=>{
+  
+    const old = snap.val()?.score || 0;
+  
+
+  
+    if(score > old){
+  
+      update(userRef, { score: score });
+  
+      loadLeaderboard();
+  
+    }
+  
+  });
+  
+};
+  
+
+  
+window.logout = function(){
+  
+  signOut(auth).then(()=>{
+  
+    location.href = "index.html";
+  
+  });
+  
+};
+  
+
+  
+async function loadLeaderboard(){
+  
+  const snap = await get(ref(db, "users"));
+  
+  if(!snap.exists()) return;
+  
+
+  
+  let data = Object.values(snap.val());
+  
+  data.sort((a,b)=>b.score - a.score);
+
+  
+  let html = "<b>Leaderboard</b><br>";
+  
+  data.slice(0,5).forEach((d,i)=>{
+  
+    html += `${i+1}. ${d.name || "Player"} - ${d.score}<br>`;
+  
+  });
+  
+
+  
+  document.getElementById("leaderboard").innerHTML = html;
+  
+}
+  
+</script>
+</body>
 </html>
