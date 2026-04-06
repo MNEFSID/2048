@@ -137,6 +137,16 @@ button:active, .ctrl:active {
   from { transform: scale(0); }
   to { transform: scale(1); }
 }
+
+#over h2 {
+  font-family: 'Fredoka';
+  margin-bottom: 15px;
+  color: #776e65;
+}
+#over button {
+  padding: 12px 20px;
+  font-size: 16px;
+  }
 </style>
 
 <!-- HTML STRUCTURE -->
@@ -148,7 +158,12 @@ button:active, .ctrl:active {
 </div>
 
 <div id="game"></div>
-
+  
+<div id="over">
+  <h2>Game Over</h2>
+  <button class="ctrl" onclick="restart()">Restart</button>
+</div>
+  
 <div id="controls">
   <div></div>
   <button class="ctrl" onclick="move('up')">↑</button>
@@ -337,7 +352,7 @@ function checkGameOver() {
 
   document.querySelectorAll(".tile").forEach(t => t.style.opacity = "0.3");
   document.getElementById("over").style.display = "flex";
-}
+    }
 
 function restart() {
   document.getElementById("over").style.display = "none";
